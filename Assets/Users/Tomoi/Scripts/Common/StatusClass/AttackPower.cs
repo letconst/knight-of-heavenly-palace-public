@@ -12,11 +12,13 @@ public class AttackPower
         Value = 0 <= initValue ? initValue : 0;
         MaxValue = initMaxValue;
     }
-    
-    /// <summary>正数のチェック</summary>
-    /// <param name="_value"></param>
-    private bool CheckPositiveNumber(int _value)
+    /// <summary>
+    /// 攻撃の倍率を上昇させる計算をする
+    /// 小数点切り捨て
+    /// </summary>
+    /// <param name="attackMagnification"></param>
+    public void Magnification(AttackMagnification attackMagnification)
     {
-        return 0 <= _value;
+        Value = (int)(Value * attackMagnification.Value);
     }
 }

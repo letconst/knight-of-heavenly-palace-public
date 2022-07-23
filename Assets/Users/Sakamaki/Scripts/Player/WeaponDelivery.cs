@@ -10,7 +10,7 @@ public class WeaponDelivery : MonoBehaviour
     {
         if (SwitchInputManager.Instance.GetKeyDown(SwitchInputManager.JoyConButton.X) || Input.GetKeyDown(KeyCode.X))
         {
-            PlayerStatus.playerAttackState = PlayerStatus.PlayerAttackState.SwordPulling;
+            /*layerStatus.playerAttackStateR = PlayerStatus.PlayerAttackState.SwordPulling;*/
             Debug.Log("抜刀");
         }
     }

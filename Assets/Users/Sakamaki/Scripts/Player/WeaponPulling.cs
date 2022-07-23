@@ -11,7 +11,7 @@ public class WeaponPulling : MonoBehaviour
         // Yボタンで納刀を行う
         if (SwitchInputManager.Instance.GetKeyDown(SwitchInputManager.JoyConButton.Y) || Input.GetKeyDown(KeyCode.Z))
         {
-            PlayerStatus.playerAttackState = PlayerStatus.PlayerAttackState.SwordDelivery;
+            /*PlayerStatus.playerAttackStateR = PlayerStatus.PlayerAttackState.SwordDelivery;*/
             Debug.Log("納刀");
         }
     }

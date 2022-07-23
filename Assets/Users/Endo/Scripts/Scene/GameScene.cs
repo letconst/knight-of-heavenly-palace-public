@@ -4,4 +4,6 @@ public enum GameScene
     transition,
     transition2,
     MainGame,
+    Result,
+    Lobby,
 }

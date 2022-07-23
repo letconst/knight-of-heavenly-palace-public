@@ -7,16 +7,26 @@ using nn.util;
 
 public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
 {
+    //Joy-Conの本体情報
     private NpadId npadId = NpadId.Invalid;
     private NpadStyle npadStyle = NpadStyle.Invalid;
     private NpadState npadState = new NpadState();
 
+    //Joy-Conの軸センサーの情報
     private SixAxisSensorHandle[] handle = new SixAxisSensorHandle[2];
     private SixAxisSensorState state = new SixAxisSensorState();
     private int handleCount = 0;
 
     private nn.util.Float4 npadQuaternion = new nn.util.Float4();
     private Quaternion quaternion = new Quaternion();
+
+    //Joy-Conのバイブレーション情報
+    private VibrationValue vibrationValue = VibrationValue.Make();
+    public int vibrationDeviceCount { get;private set; } = 0;
+    private const int vibrationDeviceCountMax = 2;
+    public VibrationDeviceHandle[] vibrationDeviceHandles { get;private set; }= new VibrationDeviceHandle[vibrationDeviceCountMax];
+    private VibrationDeviceInfo[] vibrationDeviceInfos = new VibrationDeviceInfo[vibrationDeviceCountMax];
+
 
     public enum AnalogStick
     {
@@ -44,6 +54,11 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
         Down = 0x1 << 15,
     }
 
+    /// <summary>
+    /// 引数のJoy-Conのボタンをホールドしているときにtrueが返る関数
+    /// </summary>
+    /// <param name="_joyConButton"></param>
+    /// <returns></returns>
     public bool GetKey(JoyConButton _joyConButton)
     {
         NpadButton _npadButton = TransrationJoyConButtonToNpadButton(_joyConButton);
@@ -52,9 +67,15 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
         {
             return true;
         }
+
         return false;
     }
 
+    /// <summary>
+    /// 引数のJoy-Conのボタンを離したときにtrueが返る関数
+    /// </summary>
+    /// <param name="_joyConButton"></param>
+    /// <returns></returns>
     public bool GetKeyUp(JoyConButton _joyConButton)
     {
         NpadButton _npadButton = TransrationJoyConButtonToNpadButton(_joyConButton);
@@ -63,9 +84,15 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
         {
             return true;
         }
+
         return false;
     }
 
+    /// <summary>
+    /// 引数のJoy-Conのボタンを押したときにtrueが返る関数
+    /// </summary>
+    /// <param name="_joyConButton"></param>
+    /// <returns></returns>
     public bool GetKeyDown(JoyConButton _joyConButton)
     {
         NpadButton _npadButton = TransrationJoyConButtonToNpadButton(_joyConButton);
@@ -74,14 +101,25 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
         {
             return true;
         }
+
         return false;
     }
 
+    /// <summary>
+    /// SwitchInputManagerで定義しているJoyConButtonのenumをNintendoSDKで定義しているNpadButtonに変換する関数
+    /// </summary>
+    /// <param name="_joyConButton"></param>
+    /// <returns></returns>
     private NpadButton TransrationJoyConButtonToNpadButton(JoyConButton _joyConButton)
     {
-        return (NpadButton)Enum.Parse(typeof(NpadButton),_joyConButton.ToString());
+        return (NpadButton)Enum.Parse(typeof(NpadButton), _joyConButton.ToString());
     }
 
+    /// <summary>
+    /// 引数で指定したJoystickについているアナログスティックの入力情報を-1 ~ 1のVector2で返す関数
+    /// </summary>
+    /// <param name="_analogStick"></param>
+    /// <returns></returns>
     public Vector2 GetAxis(AnalogStick _analogStick)
     {
         AnalogStickState _state = default;
@@ -97,32 +135,40 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
             default:
                 return Vector2.zero;
         }
-        axis.x =(float) _state.x / (float) AnalogStickState.Max;
-        axis.y =(float) _state.y / (float) AnalogStickState.Max;
+
+        axis.x = (float)_state.x / (float)AnalogStickState.Max;
+        axis.y = (float)_state.y / (float)AnalogStickState.Max;
         return axis;
     }
+
+    ///<summary>加速度センサーの各方向ごとの加速度の値です。単位は G です。</summary>
+    public Float3 LeftAcceleration { get; private set; }
+
+    ///<summary>各方向ごとの角速度の値を積算して得られる回転角の値です。360度 を 1.0 とする値です。</summary>
+    public Float3 LeftAngle { get; private set; }
+
+    ///<summary>ジャイロセンサーの各方向ごとの角速度の値です。360dps を 1.0 とする値です。</summary>
+    public Float3 LeftAngularVelocity { get; private set; }
+
+    ///<summary>加速度センサーの各方向ごとの加速度の値です。単位は G です。</summary>
+    public Float3 RightAcceleration { get; private set; }
+
+    ///<summary>各方向ごとの角速度の値を積算して得られる回転角の値です。360度 を 1.0 とする値です。</summary>
+    public Float3 RightAngle { get; private set; }
+
+    /// <summary>ジャイロセンサーの各方向ごとの角速度の値です。360dps を 1.0 とする値です。</summary>
+    public Float3 RightAngularVelocity { get; private set; }
+
+    #region Joy-Conの接続をする処理
 
     void Start()
     {
         Npad.Initialize();
         Npad.SetSupportedStyleSet(NpadStyle.Handheld | NpadStyle.JoyDual | NpadStyle.FullKey);
-        NpadId[] npadIds = {NpadId.Handheld, NpadId.No1};
+        NpadId[] npadIds = { NpadId.Handheld, NpadId.No1 };
         Npad.SetSupportedIdType(npadIds);
     }
 
-    //加速度センサーの各方向ごとの加速度の値です。単位は G です。
-    public Float3 LeftAcceleration { get; private set; }
-    //各方向ごとの角速度の値を積算して得られる回転角の値です。360度 を 1.0 とする値です。
-    public Float3 LeftAngle { get; private set; }
-    //ジャイロセンサーの各方向ごとの角速度の値です。360dps を 1.0 とする値です。
-    public Float3 LeftAngularVelocity { get; private set; }
-
-    //加速度センサーの各方向ごとの加速度の値です。単位は G です。
-    public Float3 RightAcceleration { get; private set; }
-    //各方向ごとの角速度の値を積算して得られる回転角の値です。360度 を 1.0 とする値です。
-    public Float3 RightAngle { get; private set; }
-    //ジャイロセンサーの各方向ごとの角速度の値です。360dps を 1.0 とする値です。
-    public Float3 RightAngularVelocity { get; private set; }
 
     void Update()
     {
@@ -148,12 +194,14 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
                     LeftAcceleration = state.acceleration;
                     LeftAngle = state.angle;
                     LeftAngularVelocity = state.angularVelocity;
-                }else if (i == 1)//右
+                }
+                else if (i == 1) //右
                 {
                     RightAcceleration = state.acceleration;
                     RightAngle = state.angle;
                     RightAngularVelocity = state.angularVelocity;
                 }
+
                 state.GetQuaternion(ref npadQuaternion);
                 quaternion.Set(npadQuaternion.x, npadQuaternion.z, npadQuaternion.y, -npadQuaternion.w);
                 if (handleCount == 1)
@@ -175,6 +223,7 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
                 if ((npadId != NpadId.Handheld) || (npadStyle != handheldStyle))
                 {
                     this.GetSixAxisSensor(NpadId.Handheld, handheldStyle);
+                    this.GetVibrationDevice(NpadId.Handheld, handheldStyle);
                 }
 
                 npadId = NpadId.Handheld;
@@ -194,6 +243,7 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
                 if ((npadId != NpadId.No1) || (npadStyle != no1Style))
                 {
                     this.GetSixAxisSensor(NpadId.No1, no1Style);
+                    this.GetVibrationDevice(NpadId.No1, no1Style);
                 }
 
                 npadId = NpadId.No1;
@@ -226,6 +276,24 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
         return true;
     }
 
+    private void GetVibrationDevice(NpadId id, NpadStyle style)
+    {
+        vibrationValue.Clear();
+        for (int i = 0; i < vibrationDeviceCount; i++)
+        {
+            Vibration.SendValue(vibrationDeviceHandles[i], vibrationValue);
+        }
+
+        vibrationDeviceCount = Vibration.GetDeviceHandles(
+            vibrationDeviceHandles, vibrationDeviceCountMax, id, style);
+
+        for (int i = 0; i < vibrationDeviceCount; i++)
+        {
+            Vibration.InitializeDevice(vibrationDeviceHandles[i]);
+            Vibration.GetDeviceInfo(ref vibrationDeviceInfos[i], vibrationDeviceHandles[i]);
+        }
+    }
+
     private void GetSixAxisSensor(NpadId id, NpadStyle style)
     {
         for (int i = 0; i < handleCount; i++)
@@ -240,4 +308,6 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
             SixAxisSensor.Start(handle[i]);
         }
     }
+
+    #endregion
 }

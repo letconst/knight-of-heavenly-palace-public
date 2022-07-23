@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Button : MonoBehaviour
 {
+    internal bool interactable;
+
     public void OnPushedButton()
     {
         Debug.Log("ボタンが押されたよ！！"); // コンソールに表示

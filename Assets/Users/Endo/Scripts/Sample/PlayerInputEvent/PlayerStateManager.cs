@@ -7,7 +7,7 @@ namespace Endo.Sample.PlayerInputEvent
     {
         private void Start()
         {
-            PlayerStatus.playerAttackState = PlayerStatus.PlayerAttackState.SwordDelivery;
+            PlayerStatus.playerAttackStateR = PlayerStatus.PlayerAttackState.SwordDelivery;
 
             IMessageBroker inputBroker = PlayerInputEventEmitter.Instance.Broker;
 
@@ -17,7 +17,7 @@ namespace Endo.Sample.PlayerInputEvent
                        {
                            // x.ActionInfo.actHandに左手か右手かの情報が入ってる
                            // ステートを投擲モードに変更
-                           PlayerStatus.playerAttackState = PlayerStatus.PlayerAttackState.Throwing;
+                           PlayerStatus.playerAttackStateR = PlayerStatus.PlayerAttackState.Throwing;
                        })
                        .AddTo(this);
 
@@ -34,7 +34,7 @@ namespace Endo.Sample.PlayerInputEvent
                        .Subscribe(_ =>
                        {
                            // ステートを納刀に変更
-                           PlayerStatus.playerAttackState = PlayerStatus.PlayerAttackState.SwordDelivery;
+                           PlayerStatus.playerAttackStateR = PlayerStatus.PlayerAttackState.SwordDelivery;
                        })
                        .AddTo(this);
 
@@ -43,7 +43,7 @@ namespace Endo.Sample.PlayerInputEvent
                        .Subscribe(_ =>
                        {
                            // ステートを抜刀に変更
-                           PlayerStatus.playerAttackState = PlayerStatus.PlayerAttackState.SwordPulling;
+                           PlayerStatus.playerAttackStateR = PlayerStatus.PlayerAttackState.SwordPulling;
                        })
                        .AddTo(this);
         }

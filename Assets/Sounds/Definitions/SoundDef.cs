@@ -4,4 +4,7 @@
 public enum SoundDef
 {
     Sample,
+    SwitchSwordMode,
+    CursorLocked,
+    SwordAttack,
 }

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 841a5e74149a1e04ba027c53d3eabaa7, type: 3}
+  m_Name: EffectData
+  m_EditorClassIdentifier: 
+  EffectDataList:
+  - EffectTypeString: SwordTrailL
+    ParticlePlayer: {fileID: 5949072833785988158, guid: ed1d592762c906c4d857186067165ec8,
+      type: 3}
+    EffectType: 0
+  - EffectTypeString: SwordTrailR
+    ParticlePlayer: {fileID: -1500784039557170768, guid: cacf9a15d5bf9134b8ed1b004eeebb2f,
+      type: 3}
+    EffectType: 1
+  - EffectTypeString: DustParticle
+    ParticlePlayer: {fileID: 0}
+    EffectType: 2

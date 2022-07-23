@@ -1,5 +1,6 @@
+using System;
 using UnityEngine;
-public class JoyConAngleCheck 
+public partial class JoyConAngleCheck:SingletonMonoBehaviour<JoyConAngleCheck>
 {
     public enum Position{
         Right,
@@ -12,7 +13,9 @@ public class JoyConAngleCheck
         RightDown,
         None
     }
-    
+
+    private Vector2 _PositoinResetLeftVector2 = Vector2.zero;
+    private Vector2 _PositoinResetRightVector2 = Vector2.zero;
     private static (int frameCount, Position position) _leftPositionCache;
     private static (int frameCount, Position position) _rightPositionCache;
 
@@ -21,56 +24,58 @@ public class JoyConAngleCheck
     /// </summary>
     /// <param name="_joyStick">Joy-Conを持っている手のenumを引数で渡す</param>
     /// <returns></returns>
-    public static Position GetJoyConAnglePosition(nn.hid.NpadJoyDeviceType _joyStick)
+    public Position GetJoyConAnglePosition(nn.hid.NpadJoyDeviceType _joyStick)
     {
         //初期化
         Position _position = Position.None;
         switch (_joyStick)
         {
             case nn.hid.NpadJoyDeviceType.Left:
-                LeftJoyConAnglePosition();
+                LeftJoyConAnglePosition(JoyConToScreenPointer.Instance.LeftJoyConSingleCircleVector2,
+                                        _PositoinResetLeftVector2, ref _leftPositionCache);
                 _position = _leftPositionCache.position;
                 break;
             case nn.hid.NpadJoyDeviceType.Right:
-                RightJoyConAnglePosition();
+                RightJoyConAnglePosition(JoyConToScreenPointer.Instance.RightJoyConSingleCircleVector2,
+                                         _PositoinResetRightVector2, ref _rightPositionCache);
                 _position = _rightPositionCache.position;
                 break;
         }
         return _position;
     }
 
-    private static void RightJoyConAnglePosition()
+    private void RightJoyConAnglePosition(in Vector2 joyConSingleCircle, in Vector2 positionReset, ref (int frameCount, Position position) posCache)
     {
-        if (_rightPositionCache.frameCount != Time.frameCount)
+        if (posCache.frameCount != Time.frameCount)
         {
             //右
             //i = 0が右に存在している時 そこから反時計回りに+1ずつされる
             for (int i = 0; i < 8; i++)
             {
-                if (i == 0)
+                /*if (i == 0)
                 {
                     if (!(Mathf.Repeat(GenerateAngle(i - 1), 360) >
-                          angle(JoyConToScreenPointer.Instance.RightJoyConSingleCircleVector2) &&
-                          angle(JoyConToScreenPointer.Instance.RightJoyConSingleCircleVector2) >
+                          angle(JoyConToScreenPointer.Instance.RightJoyConSingleCircleVector2 + _PositoinResetRightVector2) &&
+                          angle(JoyConToScreenPointer.Instance.RightJoyConSingleCircleVector2 + _PositoinResetRightVector2) >
                           Mathf.Repeat(GenerateAngle(i), 360)))
                     {
                         _rightPositionCache.position = (Position)i;
                         _rightPositionCache.frameCount = Time.frameCount;
-                        
+
                         //TODO:コンボの処理
                         continue;
                     }
                 }
-                else
+                else*/
                 {
                     if (Mathf.Repeat(GenerateAngle(i - 1), 360) <
-                        angle(JoyConToScreenPointer.Instance.RightJoyConSingleCircleVector2) &&
-                        angle(JoyConToScreenPointer.Instance.RightJoyConSingleCircleVector2) <
+                        angle(joyConSingleCircle + positionReset) &&
+                        angle(joyConSingleCircle + positionReset) <
                         Mathf.Repeat(GenerateAngle(i), 360))
                     {
-                        _rightPositionCache.position = (Position)i;
-                        _rightPositionCache.frameCount = Time.frameCount;
-                        
+                        posCache.position = (Position)i;
+                        posCache.frameCount = Time.frameCount;
+
                         //TODO:コンボの処理
                         continue;
                     }
@@ -79,9 +84,9 @@ public class JoyConAngleCheck
         }
 
     }
-    private static void LeftJoyConAnglePosition()
+    private void LeftJoyConAnglePosition(in Vector2 joyConSingleCircle, in Vector2 positionReset, ref (int frameCount, Position position) posCache)
     {
-        if (_leftPositionCache.frameCount != Time.frameCount)
+        if (posCache.frameCount != Time.frameCount)
         {
             //左
             for (int i = 0; i < 8; i++)
@@ -89,12 +94,12 @@ public class JoyConAngleCheck
                 if (i == 0)
                 {
                     if (!(Mathf.Repeat(GenerateAngle(i - 1), 360) >
-                          angle(JoyConToScreenPointer.Instance.LeftJoyConSingleCircleVector2) &&
-                          angle(JoyConToScreenPointer.Instance.LeftJoyConSingleCircleVector2) >
+                          angle(joyConSingleCircle + positionReset) &&
+                          angle(joyConSingleCircle + positionReset) >
                           Mathf.Repeat(GenerateAngle(i), 360)))
                     {
-                        _leftPositionCache.position = (Position)i;
-                        _leftPositionCache.frameCount = Time.frameCount;
+                        posCache.position = (Position)i;
+                        posCache.frameCount = Time.frameCount;
                         //TODO:コンボの処理
                         continue;
                     }
@@ -102,12 +107,12 @@ public class JoyConAngleCheck
                 else
                 {
                     if (Mathf.Repeat(GenerateAngle(i - 1), 360) <
-                        angle(JoyConToScreenPointer.Instance.LeftJoyConSingleCircleVector2) &&
-                        angle(JoyConToScreenPointer.Instance.LeftJoyConSingleCircleVector2) <
+                        angle(joyConSingleCircle + positionReset) &&
+                        angle(joyConSingleCircle + positionReset) <
                         Mathf.Repeat(GenerateAngle(i), 360))
                     {
-                        _leftPositionCache.position = (Position)i;
-                        _leftPositionCache.frameCount = Time.frameCount;
+                        posCache.position = (Position)i;
+                        posCache.frameCount = Time.frameCount;
                         //TODO:コンボの処理
                         continue;
                     }
@@ -134,5 +139,18 @@ public class JoyConAngleCheck
             angle += 360;
         }
         return angle;
+    }
+
+    public void PositoinReset(nn.hid.NpadJoyDeviceType _joyStick)
+    {
+        switch (_joyStick)
+        {
+            case nn.hid.NpadJoyDeviceType.Left:
+                _PositoinResetLeftVector2 = -JoyConToScreenPointer.Instance.LeftJoyConSingleCircleVector2;
+                break;
+            case nn.hid.NpadJoyDeviceType.Right:
+                _PositoinResetRightVector2 = -JoyConToScreenPointer.Instance.RightJoyConSingleCircleVector2;
+                break;
+        }
     }
 }

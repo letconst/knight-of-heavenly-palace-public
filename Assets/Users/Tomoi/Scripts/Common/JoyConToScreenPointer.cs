@@ -9,7 +9,7 @@ using Vector3 = UnityEngine.Vector3;
 /// Joy-ConのAngle.x,y,zからQuaternionを生成しJoy-Conの角度を変えるとカーソルの座標が変わる
 /// カーソルの座標にCanvasの縦横のピクセル数をかけるスクリプト
 /// </summary>
-public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointer>
+public partial class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointer>
 {
     //DisplaySize
     [SerializeField] private float _ScreenWidth;
@@ -31,7 +31,7 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
     /// <summary>画面の中央への補正値 </summary>
     private Vector3 _LeftAngleOffset = default;
     private Vector3 _RightAngleOffset = default;
-    
+
     private float[] _LeftAngularVelocityOffset = new float[3]{0,0,0};
     private float[] _RightAngularVelocityOffset = new float[3]{0,0,0};
 
@@ -60,7 +60,7 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
     void Update()
     {
         ResetTime += Time.deltaTime;
-        
+
         if (_GyroDriftCorrection)//ジャイロドリフト修正版
         {
             LeftJoyConScreenVector2 = RotationMatrixX(new Vector2(
@@ -72,10 +72,10 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
         {
             LeftJoyConScreenVector2 = RotationMatrixX(new Vector2(
                     -LeftAngleZ(),
-                    LeftAngleX()), 
+                    LeftAngleX()),
                 -LeftAngleY() * 360);
         }
-        
+
         if (_GyroDriftCorrection)//ジャイロドリフト修正版
         {
             RightJoyConScreenVector2 = RotationMatrixX(new Vector2(
@@ -87,7 +87,7 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
         {
             RightJoyConScreenVector2 = RotationMatrixX(new Vector2(
                     -RightAngleZ(),
-                    RightAngleX()), 
+                    RightAngleX()),
                 -RightAngleY() * 360);
         }
 
@@ -95,21 +95,23 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
         RightJoyConSingleCircleVector2 = RightJoyConScreenVector2;
         LeftJoyConScreenVector2 = PointerOnOffScreenToScreen(ScaleToCanvas(LeftJoyConScreenVector2));
         RightJoyConScreenVector2 = PointerOnOffScreenToScreen(ScaleToCanvas(RightJoyConScreenVector2));
+
+        UpdateForSimulate();
     }
 
     #region JoyConInput
-    
+
     /*左Joy-Con*/
     /*角速度*/
     private float LeftAngularVelocityY() {return SwitchInputManager.Instance.LeftAngularVelocity.y + _LeftAngularVelocityOffset[1];}
     private float LeftAngularVelocityX() {return SwitchInputManager.Instance.LeftAngularVelocity.x + _LeftAngularVelocityOffset[0];}
     private float LeftAngularVelocityZ() {return SwitchInputManager.Instance.LeftAngularVelocity.z + _LeftAngularVelocityOffset[2];}
-    
+
     /*加速度*/
     private float LeftAccelerationX(){return SwitchInputManager.Instance.LeftAcceleration.x;}
     private float LeftAccelerationY(){return SwitchInputManager.Instance.LeftAcceleration.y;}
     private float LeftAccelerationZ(){return SwitchInputManager.Instance.LeftAcceleration.z;}
-    
+
     /*角度*/
     private float LeftAngleX(){return SwitchInputManager.Instance.LeftAngle.x - _LeftAngleOffset.x;}
     private float LeftAngleY(){return SwitchInputManager.Instance.LeftAngle.y - _LeftAngleOffset.y;}
@@ -120,12 +122,12 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
     private float RightAngularVelocityX() {return SwitchInputManager.Instance.RightAngularVelocity.x + _RightAngularVelocityOffset[0];}
     private float RightAngularVelocityY() {return SwitchInputManager.Instance.RightAngularVelocity.y + _RightAngularVelocityOffset[1];}
     private float RightAngularVelocityZ() {return SwitchInputManager.Instance.RightAngularVelocity.z + _RightAngularVelocityOffset[2];}
-    
+
     /*加速度*/
     private float RightAccelerationX(){return SwitchInputManager.Instance.RightAcceleration.x;}
     private float RightAccelerationY(){return SwitchInputManager.Instance.RightAcceleration.y;}
     private float RightAccelerationZ(){return SwitchInputManager.Instance.RightAcceleration.z;}
-    
+
     /*角度*/
     private float RightAngleX(){return SwitchInputManager.Instance.RightAngle.x - _RightAngleOffset.x;}
     private float RightAngleY(){return SwitchInputManager.Instance.RightAngle.y - _RightAngleOffset.y;}
@@ -147,7 +149,7 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
         {
             _vector2.x = 0;
         }
-        
+
         //y
         if (_ScreenHeight <= _vector2.y)
         {
@@ -156,12 +158,12 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
         {
             _vector2.y = 0;
         }
-        
+
         return _vector2;
     }
-    
+
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="_v2">回転元のVector2</param>
     /// <param name="_angle">回転する角度</param>
@@ -170,7 +172,7 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
     {
         //ラジアンに変換
         _angle *= Mathf.Deg2Rad;
-        
+
         Vector2 _rv;//return vector2
         _rv.x = _v2.x * Mathf.Cos(_angle) + _v2.y * -Mathf.Sin(_angle);
         _rv.y = _v2.x * Mathf.Sin(_angle) + _v2.y * Mathf.Cos(_angle);
@@ -185,19 +187,14 @@ public class JoyConToScreenPointer : SingletonMonoBehaviour<JoyConToScreenPointe
         /*画面サイズに拡大*/
         _vector2.x *= _ScreenWidth;
         _vector2.y *= _ScreenHeight;
-            
+
         /*画面の中心に移動*/
         _vector2.x += _CursorCenterX;
         _vector2.y += _CursorCenterY;
 
         return _vector2;
     }
-    public enum JoyCon
-    {
-        Left,
-        Right,
-        Both
-    }
+
 
     public void AngleReset(JoyCon _JoyCon = JoyCon.Both)
     {

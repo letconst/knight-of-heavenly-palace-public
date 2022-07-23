@@ -3,4 +3,6 @@
 /// </summary>
 public enum MusicDef
 {
+    First,
+    Loop,
 }

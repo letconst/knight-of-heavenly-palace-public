@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using nn.hid;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,9 @@ public class JoyConAngleCheckTest : MonoBehaviour
 {
     [SerializeField]
     private Image[] _DebugImages = new Image[8];
+    /*
+     *+ボタンでポジションをリセット
+     */
 
     [SerializeField] private Image[] _DebugPointerImages = new Image[2];
     void Update()
@@ -14,6 +18,8 @@ public class JoyConAngleCheckTest : MonoBehaviour
         if (SwitchInputManager.Instance.GetKeyDown(SwitchInputManager.JoyConButton.Plus))
         {
             JoyConToScreenPointer.Instance.AngleReset();
+            JoyConAngleCheck.Instance.PositoinReset(NpadJoyDeviceType.Left);
+            JoyConAngleCheck.Instance.PositoinReset(NpadJoyDeviceType.Right);
         }
 
         _DebugPointerImages[0].transform.position = JoyConToScreenPointer.Instance.LeftJoyConScreenVector2;
@@ -22,7 +28,7 @@ public class JoyConAngleCheckTest : MonoBehaviour
         {
             _image.color = Color.black;
         }
-        _DebugImages[(int)JoyConAngleCheck.GetJoyConAnglePosition(nn.hid.NpadJoyDeviceType.Right)].color = Color.red;
-        _DebugImages[(int)JoyConAngleCheck.GetJoyConAnglePosition(nn.hid.NpadJoyDeviceType.Left)].color = Color.blue;
+        _DebugImages[(int)JoyConAngleCheck.Instance.GetJoyConAnglePosition(nn.hid.NpadJoyDeviceType.Right)].color = Color.red;
+        _DebugImages[(int)JoyConAngleCheck.Instance.GetJoyConAnglePosition(nn.hid.NpadJoyDeviceType.Left)].color = Color.blue;
     }
 }

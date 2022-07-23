@@ -11,6 +11,9 @@ public class FadeContllor2 : SingletonMonoBehaviour<FadeContllor2>
     private static Image image;
     private bool _canLoadScene = true;
 
+    public static SceneDataPack PreviousSceneData;
+   
+
     private static void Init()
     {
         GameObject canvasObject = new GameObject("CanvasFade");
@@ -33,18 +36,22 @@ public class FadeContllor2 : SingletonMonoBehaviour<FadeContllor2>
 
         canvasObject.AddComponent<FadeContllor2>();
 
+        
+
     }
     private void Start()
     {
         Init();
     }
+   
     
-    public void LoadScene(float interval, GameScene gameScene )
+    public void LoadScene(float interval, GameScene gameScene,SceneDataPack sceneDataPack = null )
     {
         
 
         if (_canLoadScene)
         {
+            PreviousSceneData = sceneDataPack;
             StartCoroutine(Fade(interval, gameScene.ToString()));
         }
     }

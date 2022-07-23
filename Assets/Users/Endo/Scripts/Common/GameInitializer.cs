@@ -11,6 +11,8 @@ public static class GameInitializer
         // オブジェクト自動生成
         GenerateObject<SwitchInputManager>();
         GenerateObject<MasterDataManager>();
+        GenerateObject<FadeContllor2>();
+        GenerateObject<SoundManager>();
     }
 
     private static void GenerateObject<T>() where T : Component

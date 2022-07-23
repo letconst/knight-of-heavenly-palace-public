@@ -15,5 +15,10 @@ public class PlayerConstParams
     // 地面に設置している時の回復
     public const int GROUND_RECOVERY_SP_RATIO = 2;
     // プレイヤーの移動速度
-    public const float DEFAULT_MOVESPEED = 10f;
+    public const float DEFAULT_MOVE_SPEED = 10f;
+    // プレイヤーのジャンプパワー
+    public const float DEFAULT_JUMP_POWER = 150f;
+    // プレイヤーの回避速度
+    public const float DEFAULT_DODGE_SPEED = 2f;
+
 }
