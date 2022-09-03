@@ -20,9 +20,9 @@ public class UIDraw : MonoBehaviour
     void Update()
     {
         // 抜刀モードと投擲モード時にカーソルの表示処理と位置初期化
-        if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.SwordPulling) ||
-            PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingR) ||
-            PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingL))
+        // 2022/08/30 投擲モードを追加したので抜刀時はカーソルを表示しないように変更
+        if (/*PlayerStateManager.HasFlag(PlayerStatus.PlayerState.SwordPulling) ||*/
+            PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingMode))
         {
             if (!isCursorInit)
             {

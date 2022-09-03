@@ -14,24 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHitPoint: 100
   maxStaminaPoint: 100
+  baseJumpPower: 150
   baseAutoStaminaRecoveryQuantity: 5
   baseMoveSpeed: 10
+  attackInterval: 1
+  attackTargetFindRadius: 30
+  dodgeInterval: 1
   normalDodgeInfo:
-    motionSpeed: 0
-    requireMagicPower: 0
-    requireStaminaPoint: 0
+    dodgeSpeed: 2
+    requireMagicPower: 1
+    requireStaminaPoint: 5
     acquireMagicPower: 0
     invincibilityFrame: 0
     flinchFrame: 0
   inAirDodgeInfo:
-    motionSpeed: 0
+    dodgeSpeed: 1
     requireMagicPower: 0
     requireStaminaPoint: 0
     acquireMagicPower: 0
     invincibilityFrame: 0
     flinchFrame: 0
   escapingDodgeInfo:
-    motionSpeed: 0
+    dodgeSpeed: 0
     requireMagicPower: 0
     requireStaminaPoint: 0
     acquireMagicPower: 0

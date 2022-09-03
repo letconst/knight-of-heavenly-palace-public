@@ -68,12 +68,14 @@ public abstract class EnemyBase : MonoBehaviour
         Broker.Receive<OnStatusDestroy>()
               .Subscribe(_ =>
               {
-                  //TODO:処理
+                  OnDead();
               })
               .AddTo(this);
     }
 
     public abstract void Attack();
+
+    protected abstract void OnDead();
 
     /// <summary>
     /// マスターデータ読み込み完了時の処理

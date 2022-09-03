@@ -22,5 +22,26 @@ MonoBehaviour:
       type: 3}
     EffectType: 1
   - EffectTypeString: DustParticle
-    ParticlePlayer: {fileID: 0}
+    ParticlePlayer: {fileID: 4427611753943544427, guid: ac8d7192619075c47b0c62f1619ed321,
+      type: 3}
     EffectType: 2
+  - EffectTypeString: SwordTransfer_In_Left
+    ParticlePlayer: {fileID: 3283978868577285231, guid: bbb464081dee7c04097c1e2df1a536d0,
+      type: 3}
+    EffectType: 3
+  - EffectTypeString: SwordTransfer_Out_Left
+    ParticlePlayer: {fileID: 6506520459262449431, guid: ec447f75dc330734390bbb91fa9f2781,
+      type: 3}
+    EffectType: 4
+  - EffectTypeString: SwordTransfer_In_Right
+    ParticlePlayer: {fileID: 5228178706606697807, guid: 33a6be1539acb0d4ba35f36607bd7680,
+      type: 3}
+    EffectType: 5
+  - EffectTypeString: SwordTransfer_Out_Right
+    ParticlePlayer: {fileID: 208742230566729306, guid: 9b5924f38af54da4991d1dd413f4888d,
+      type: 3}
+    EffectType: 6
+  - EffectTypeString: FireBreath
+    ParticlePlayer: {fileID: 415186661597360515, guid: b49e2eb0d67fb074dbebc451d78bdc01,
+      type: 3}
+    EffectType: 7

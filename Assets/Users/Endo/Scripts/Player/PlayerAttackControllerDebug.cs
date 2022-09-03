@@ -12,6 +12,7 @@ public partial class PlayerAttackController
         attackCol.enabled = false;
 
         attackCol.OnTriggerEnterAsObservable()
+                 .Where(other => !other.isTrigger)
                  .Where(other => other.GetComponent<IDamageable>() != null)
                  .Subscribe(OnHit)
                  .AddTo(this);

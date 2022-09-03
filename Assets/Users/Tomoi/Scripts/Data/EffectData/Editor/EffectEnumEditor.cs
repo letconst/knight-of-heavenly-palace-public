@@ -74,6 +74,7 @@ public class EffectEnumEditor : EditorWindow
             {
                 //要素を更新
                 _editor = Editor.CreateEditor(effectDataBase);
+                EditorUtility.SetDirty(effectDataBase);
             }
         }
 
@@ -119,6 +120,8 @@ public class EffectEnumEditor : EditorWindow
                 if (effectDataBase != null)
                 {
                     database.EffectDataList.Add(new EffectData());
+                    EditorUtility.SetDirty(effectDataBase);
+                    AssetDatabase.SaveAssets();
                 }
             }
 
@@ -128,6 +131,7 @@ public class EffectEnumEditor : EditorWindow
                 if (effectDataBase != null)
                 {
                     database.EffectDataList.RemoveAt(database.EffectDataList.Count - 1);
+                    EditorUtility.SetDirty(effectDataBase);
                 }
             }
 

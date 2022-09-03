@@ -4,6 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public sealed class PlayerMotionController : SingletonMonoBehaviour<PlayerMotionController>
 {
+    /*
     public enum MotionType
     {
         Idle,
@@ -47,7 +48,7 @@ public sealed class PlayerMotionController : SingletonMonoBehaviour<PlayerMotion
                   if (data.InAirTime > Instance.landingMotionTimeThreshold)
                   {
                       Instance.PlayTriggerMotion(MotionType.Landing);
-                      EffectManager.Instance.EffectPlay(EffectType.DustParticle, transform.position, Quaternion.identity);
+                      EffectManager.Instance.EffectPlay(EffectType.DustParticle, Instance.transform.position, Quaternion.identity);
                   }
 
                   Instance.SetBool(MotionType.Falling, false);
@@ -115,5 +116,5 @@ public sealed class PlayerMotionController : SingletonMonoBehaviour<PlayerMotion
 
         _selfAnimator.SetFloat(floatName, (float) attackDir);
         _selfAnimator.SetTrigger(triggerName);
-    }
+    }*/
 }

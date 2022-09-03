@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
+// TODO: 非MonoBehaviour化
 public sealed class MasterDataManager : SingletonMonoBehaviour<MasterDataManager>
 {
     private readonly List<AsyncOperationHandle> _dataHandles = new();
@@ -25,6 +26,17 @@ public sealed class MasterDataManager : SingletonMonoBehaviour<MasterDataManager
     /// <returns>プレイヤーのマスターデータ</returns>
     public UniTask<MasterPlayer> GetPlayerMasterDataAsync()
     {
+        if (_dataHandles.Count > 0)
+        {
+            AsyncOperationHandle playerHandle = _dataHandles.Find(handle => handle.Result is MasterPlayer);
+
+            // プレイヤーのマスターデータがすでにロードいる場合はそれを返す
+            if (playerHandle.IsValid())
+            {
+                return UniTask.FromResult((MasterPlayer) playerHandle.Result);
+            }
+        }
+
         return InternalGetMasterDataAsync<MasterPlayer>("MasterData/Player");
     }
 

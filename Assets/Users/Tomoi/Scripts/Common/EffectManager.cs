@@ -25,7 +25,7 @@ public class EffectManager : SingletonMonoBehaviour<EffectManager>
             _ParticlePool.Add(new ParticlePlayerPool(_ParentTransform[(int)effectData.EffectType], effectData.ParticlePlayer,effectData.EffectType));
         }
         //シーンをアロード時にpoolを削除する処理
-        
+
         this.OnDestroyAsObservable().Subscribe(_ => { _ParticlePool.ForEach(pool =>
         {
             if (pool == null) throw new ArgumentNullException(nameof(pool));
@@ -39,10 +39,11 @@ public class EffectManager : SingletonMonoBehaviour<EffectManager>
     /// <param name="_effectType"></param>
     /// <param name="_position">ワールド座標</param>
     /// <param name="_rotation">ワールド回転</param>
-    public void EffectPlay(EffectType _effectType, Vector3 _position, Quaternion _rotation)
+    /// <param name="onFinish">再生終了時のコールバック</param>
+    public void EffectPlay(EffectType _effectType, Vector3 _position, Quaternion _rotation, Action onFinish = null)
     {
         var p = _ParticlePool[(int)_effectType].Rent();
-        p.PlayEffect(_position, _rotation);
+        p.PlayEffect(_position, _rotation, onFinish);
     }
 
     /// <summary>
@@ -53,22 +54,24 @@ public class EffectManager : SingletonMonoBehaviour<EffectManager>
     /// <param name="_position">ワールド座標</param>
     /// <param name="_rotation">ワールド回転</param>
     /// <param name="isLoop"></param>
-    /// <param name="duratoin"></param>
-    public void EffectPlay(EffectType _effectType, Vector3 _position, Quaternion _rotation, bool isLoop, float duration)
+    /// <param name="duration"></param>
+    /// <param name="onFinish">再生終了時のコールバック</param>
+    public void EffectPlay(EffectType _effectType, Vector3 _position, Quaternion _rotation, bool isLoop, float duration,
+                           Action onFinish = null)
     {
         var p = _ParticlePool[(int)_effectType].Rent();
         if (isLoop)
         {
             //ループエフェクトの処理
-            p.PlayEffect(_position, _rotation, duration).Forget();
+            p.PlayEffect(_position, _rotation, duration, onFinish).Forget();
         }
         else
         {
-            p.PlayEffect(_position, _rotation);
+            p.PlayEffect(_position, _rotation, onFinish);
         }
     }
 
-    
+
     /// <summary>
     /// エフェクトの再生
     /// 親オブジェクトを指定するときはローカルのpositionとrotationを更新する
@@ -78,10 +81,10 @@ public class EffectManager : SingletonMonoBehaviour<EffectManager>
     /// <param name="_rotation">ローカル回転</param>
     /// <param name="parent">変更先の親オブジェクト</param>
 
-    public void EffectPlay(EffectType _effectType, Vector3 _position, Quaternion _rotation,Transform parent)
+    public void EffectPlay(EffectType _effectType, Vector3 _position, Quaternion _rotation,Transform parent, Action onFinish = null)
     {
         var p = _ParticlePool[(int)_effectType].Rent();
-        p.PlayEffect(_position, _rotation,parent);
+        p.PlayEffect(_position, _rotation,parent, onFinish);
     }
 
     /// <summary>
@@ -94,21 +97,23 @@ public class EffectManager : SingletonMonoBehaviour<EffectManager>
     /// <param name="_rotation">ローカル回転</param>
     /// <param name="parent">変更先の親オブジェクト</param>
     /// <param name="isLoop"></param>
-    /// <param name="duratoin"></param>
-    public void EffectPlay(EffectType _effectType, Vector3 _position, Quaternion _rotation,Transform parent, bool isLoop, float duration)
+    /// <param name="duration"></param>
+    /// <param name="onFinish">再生終了時のコールバック</param>
+    public void EffectPlay(EffectType _effectType, Vector3 _position, Quaternion _rotation,Transform parent, bool isLoop,
+                           float duration, Action onFinish = null)
     {
         var p = _ParticlePool[(int)_effectType].Rent();
         if (isLoop)
         {
             //ループエフェクトの処理
-            p.PlayEffect(_position, _rotation,parent, duration).Forget();
+            p.PlayEffect(_position, _rotation,parent, duration, onFinish).Forget();
         }
         else
         {
-            p.PlayEffect(_position, _rotation,parent);
+            p.PlayEffect(_position, _rotation,parent, onFinish);
         }
     }
-    
+
     /// <summary>
     /// 再生が終了したエフェクトをプールに戻す関数
     /// </summary>

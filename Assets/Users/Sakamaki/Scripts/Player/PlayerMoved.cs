@@ -28,7 +28,8 @@ public partial class PlayerMovement
         {
             // 移動を行うので、走るステートをつける (イベントの発行)
             PlayerInputEventEmitter.Instance.
-                Broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.Move, true));
+                Broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.Move, 
+                    PlayerStateChangeOptions.Add, null, null));
         }
         
         // 移動計算処理
@@ -67,7 +68,7 @@ public partial class PlayerMovement
         if (_moveForward == Vector3.zero)
         {
             PlayerInputEventEmitter.Instance.Broker.Publish(PlayerEvent.OnStateChangeRequest
-                .GetEvent(PlayerStatus.PlayerState.Standing, true));
+                .GetEvent(PlayerStatus.PlayerState.Standing, PlayerStateChangeOptions.Add, null, null));
         }
     }
 }

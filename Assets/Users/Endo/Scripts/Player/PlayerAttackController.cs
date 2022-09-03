@@ -8,31 +8,31 @@ public sealed partial class PlayerAttackController : MonoBehaviour
     [SerializeField]
     private float swingAccelThreshold;
 
-    // TODO: マスターデータに移す
-    [SerializeField]
-    private float attackInterval;
-
-    // TODO: デバッグ表示
-    [SerializeField, Header("張り付き状態での攻撃時に攻撃対象を探す半径")]
-    private float attackTargetFindRadius;
-
     private SwitchInputManager _inputManager;
 
     private void Start()
     {
         _inputManager = SwitchInputManager.Instance;
 
-        PlayerInputEventEmitter.Instance.Broker.Receive<PlayerEvent.Input.OnAttackWeapon>()
-                               .ThrottleFirst(System.TimeSpan.FromSeconds(attackInterval)) // 一定間隔で攻撃させる (連打防止)
-                               .Subscribe(OnAttackInput)
-                               .AddTo(this);
+        UniTask.Create(async () =>
+        {
+            await PlayerStatus.WaitForLoadMasterData();
+
+            PlayerInputEventEmitter.Instance.Broker.Receive<PlayerEvent.Input.OnAttackWeapon>()
+                                   .ThrottleFirst(
+                                       System.TimeSpan.FromSeconds(
+                                           PlayerStatus.playerMasterData.AttackInterval)) // 一定間隔で攻撃させる (連打防止)
+                                   .Subscribe(OnAttackInput)
+                                   .AddTo(this);
+        });
 
         StartDebug();
 
         attackCol.OnTriggerEnterAsObservable()
+                 .Where(other => !other.isTrigger)
                  .Subscribe(collider =>
                  {
-                     var damageable = collider.GetComponent<IDamageable>();
+                     var damageable = collider.GetComponentInParent<IDamageable>();
 
                      if (damageable == null) return;
 
@@ -64,7 +64,8 @@ public sealed partial class PlayerAttackController : MonoBehaviour
         {
             Collider[] inRangeEnemies = new Collider[8];
 
-            Physics.OverlapSphereNonAlloc(transform.position, attackTargetFindRadius, inRangeEnemies, 1 << 8);
+            Physics.OverlapSphereNonAlloc(transform.position, PlayerStatus.playerMasterData.AttackTargetFindRadius,
+                                          inRangeEnemies, LayerConstants.Enemy);
 
             Collider nearestEnemy = null;
             float    minDistance  = Mathf.Infinity;
@@ -90,9 +91,17 @@ public sealed partial class PlayerAttackController : MonoBehaviour
 
             if (damageable == null) return;
 
-
             // モーション再生
-            PlayerMotionController.Instance.PlayAttackTriggerMotion(data.ActionInfo.actHand, data.AttackDirection);
+            switch (data.ActionInfo.actHand)
+            {
+                case PlayerInputEvent.PlayerHand.Right:
+                    PlayerAnimationManager.Instance.RightHangingAttack((float)data.AttackDirection);
+                    break;
+                case  PlayerInputEvent.PlayerHand.Left:
+                    PlayerAnimationManager.Instance.LeftHangingAttack((float)data.AttackDirection);
+                    break;
+            }
+            //PlayerMotionController.Instance.PlayAttackTriggerMotion(data.ActionInfo.actHand, data.AttackDirection);
 
             // TODO: タイミング調整はモーションイベントで行いたい
             await UniTask.Delay(System.TimeSpan.FromSeconds(.5f));
@@ -101,13 +110,22 @@ public sealed partial class PlayerAttackController : MonoBehaviour
 
             // ダメージ付与
             // TODO: ダメージ量はマスターデータから引っ張ってくる
-            damageable.OnDamage(new AttackPower(1));
+            damageable.OnDamage(new AttackPower(10));
         }
         // 通常攻撃
         else
         {
             // TODO: 剣のイベント化
-            PlayerMotionController.Instance.PlayAttackTriggerMotion(data.ActionInfo.actHand, data.AttackDirection);
+            switch (data.ActionInfo.actHand)
+            {
+                case PlayerInputEvent.PlayerHand.Right:
+                    PlayerAnimationManager.Instance.AttackR((float)data.AttackDirection);
+                    break;
+                case  PlayerInputEvent.PlayerHand.Left:
+                    PlayerAnimationManager.Instance.AttackL((float)data.AttackDirection);
+                    break;
+            }
+            //PlayerMotionController.Instance.PlayAttackTriggerMotion(data.ActionInfo.actHand, data.AttackDirection);
 
             await UniTask.Delay(System.TimeSpan.FromSeconds(.5f));
 

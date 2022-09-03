@@ -20,7 +20,7 @@ public abstract class EventMessage<E, P1> : EventMessage
     public static E GetEvent(P1 param1)
     {
         cache.param1 = param1;
-        
+
         return cache;
     }
 }
@@ -37,7 +37,7 @@ public abstract class EventMessage<E, P1, P2> : EventMessage
     {
         cache.param1 = param1;
         cache.param2 = param2;
-        
+
         return cache;
     }
 }
@@ -56,7 +56,28 @@ public abstract class EventMessage<E, P1, P2, P3> : EventMessage
         cache.param1 = param1;
         cache.param2 = param2;
         cache.param3 = param3;
-        
+
+        return cache;
+    }
+}
+
+public abstract class EventMessage<E, P1, P2, P3, P4> : EventMessage
+    where E : EventMessage<E, P1, P2, P3, P4>, new()
+{
+    protected static readonly E cache = new();
+
+    protected P1 param1;
+    protected P2 param2;
+    protected P3 param3;
+    protected P4 param4;
+
+    public static E GetEvent(P1 param1, P2 param2, P3 param3, P4 param4)
+    {
+        cache.param1 = param1;
+        cache.param2 = param2;
+        cache.param3 = param3;
+        cache.param4 = param4;
+
         return cache;
     }
 }

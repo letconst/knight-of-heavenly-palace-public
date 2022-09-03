@@ -16,6 +16,18 @@ public class CursorDraw : MonoBehaviour
 
     [SerializeField] private CursorStatus cursorStatusR = CursorStatus.UnlockOn;
     private CursorStatus cursorStatusL = CursorStatus.UnlockOn;
+
+    [SerializeField, Header("判定の直径")] private float _CapsuleCastRadius = 1;
+
+    /// <summary>実際にSphereCastで使用する半径用の変数</summary>
+    private float _setCapsuleCastRadius = 0;
+
+    [SerializeField, Header("オブジェクトとの距離がこの値以下ならエイムアシストを切る")]
+    private float _closeRangeDistance = 3;
+
+    public bool isAimAssist;
+    [SerializeField] private Transform Player;
+
     [SerializeField, Header("描画するオブジェクト")] private GameObject _drawObjectR;
     [SerializeField, Header("描画するオブジェクト")] private GameObject _drawObjectL;
 
@@ -44,7 +56,10 @@ public class CursorDraw : MonoBehaviour
 
     //RayCast周りに使用するの定数
     private Camera _camera;
-    private int _layerMask;
+    [SerializeField] private int _playerLayerMask;
+    [SerializeField] private LayerMask _defoultAndPlayerLayerMask;
+    private float _ScreenWidth;
+    private float _ScreenHeight;
 
     private void Start()
     {
@@ -60,9 +75,17 @@ public class CursorDraw : MonoBehaviour
         _camera = Camera.main;
 
         //プレイヤーのレイヤーのみマスク
-        _layerMask = 1 << LayerMask.NameToLayer("Player");
+        _playerLayerMask = 1 << LayerMask.NameToLayer("Player");
         //レイヤーの反転 プレイヤー以外のレイヤーをマスク
-        _layerMask = ~_layerMask;
+        _playerLayerMask = ~_playerLayerMask;
+
+        _ScreenWidth = Screen.width;
+        _ScreenHeight = Screen.height;
+
+        /*レイヤーマスクの複数反転ができない
+        _defoultAndPlayerLayerMask =  1 << LayerMask.NameToLayer ("Default Player");
+        _defoultAndPlayerLayerMask = ~_defoultAndPlayerLayerMask;
+        */
     }
 
     public void Draw()
@@ -72,13 +95,86 @@ public class CursorDraw : MonoBehaviour
             JoyConToScreenPointer.Instance.AngleReset();
         }
 
-        //カーソルの移動
-        _cursorObjR.position = JoyConToScreenPointer.Instance.RightJoyConScreenVector2;
-        _cursorObjL.position = JoyConToScreenPointer.Instance.LeftJoyConScreenVector2;
+        if (isAimAssist)
+        {
+            _setCapsuleCastRadius = _CapsuleCastRadius;
+            //右Joy-Conのエイムアシストの処理
+            var ray = _camera.ScreenPointToRay(JoyConToScreenPointer.Instance.RightJoyConScreenVector2);
+            //エイムアシストを入れるか判定
+            if (Physics.SphereCast(ray.origin, _setCapsuleCastRadius, ray.direction, out RaycastHit hitR,
+                    Mathf.Infinity,
+                    _defoultAndPlayerLayerMask))
+            {
+                if (Vector3.Distance(hitR.point, Player.position) < _closeRangeDistance)
+                {
+                    _cursorObjR.position = JoyConToScreenPointer.Instance.RightJoyConScreenVector2;
+                }
+                else
+                {
+                    var v3 = _camera.WorldToScreenPoint(hitR.point);
+                    //v3の座標が画面内ならそのまま表示する。そうでなければ元のカーソルの座標で表示する
+                    if (InScreenVector3(v3))
+                    {
+                        _cursorObjR.position = _camera.WorldToScreenPoint(hitR.point);
+                    }
+                    _cursorObjR.position = JoyConToScreenPointer.Instance.RightJoyConScreenVector2;
+                }
+            }
+            else
+            {
+                _cursorObjR.position = JoyConToScreenPointer.Instance.RightJoyConScreenVector2;
+            }
+
+            //左Joy-Conのエイムアシストの処理
+            ray = _camera.ScreenPointToRay(JoyConToScreenPointer.Instance.LeftJoyConScreenVector2);
+            //エイムアシストを入れるか判定
+            if (Physics.SphereCast(ray.origin, _setCapsuleCastRadius, ray.direction, out RaycastHit hitL,
+                    Mathf.Infinity,
+                    _defoultAndPlayerLayerMask))
+            {
+                //transform.positionではなくPlayerのtransform.Position
+                if (Vector3.Distance(hitL.point, Player.position) < _closeRangeDistance)
+                {
+                    _cursorObjL.position = JoyConToScreenPointer.Instance.LeftJoyConScreenVector2;
+                }
+                else
+                {
+                    var v3 = _camera.WorldToScreenPoint(hitL.point);
+                    //v3の座標が画面内ならそのまま表示する。そうでなければ元のカーソルの座標で表示する
+                    if (InScreenVector3(v3))
+                    {
+                        _cursorObjL.position = v3;
+                    }
+                    _cursorObjL.position = JoyConToScreenPointer.Instance.LeftJoyConScreenVector2;
+                }
+            }
+            else
+            {
+                _cursorObjL.position = JoyConToScreenPointer.Instance.LeftJoyConScreenVector2;
+            }
+        }
+        else
+        {
+            //球の半径を小さくし、擬似的にRayCastを作成
+            _setCapsuleCastRadius = 0.001f;
+            _cursorObjR.position = JoyConToScreenPointer.Instance.RightJoyConScreenVector2;
+            _cursorObjL.position = JoyConToScreenPointer.Instance.LeftJoyConScreenVector2;
+        }
 
         //カーソルのアニメーション
-        DrawSpriteAnimationR(CursorSpriteChange(_drawObjectR, _cursorObjR, cursorStatusR));
-        DrawSpriteAnimationL(CursorSpriteChange(_drawObjectL, _cursorObjL, cursorStatusL));
+        DrawSpriteAnimationR(CursorSpriteChange(_drawObjectR, _cursorObjR));
+        DrawSpriteAnimationL(CursorSpriteChange(_drawObjectL, _cursorObjL));
+    }
+
+    /// <summary>
+    /// 引数のVector3が画面内の座標か判定する
+    /// </summary>
+    /// <param name="v3"></param>
+    /// <returns></returns>
+    private bool InScreenVector3(Vector3 v3)
+    {
+        return 0 <= v3.x && v3.x <= _ScreenWidth &&
+               0 <= v3.y && v3.y <= _ScreenHeight;
     }
 
     /// <summary>
@@ -87,9 +183,8 @@ public class CursorDraw : MonoBehaviour
     /// </summary>
     /// <param name="cursorGameObject"></param>
     /// <param name="transform"></param>
-    /// <param name="cursorStatus"></param>
     /// <returns></returns>
-    private bool CursorSpriteChange(GameObject cursorGameObject, RectTransform transform, CursorStatus cursorStatus)
+    private bool CursorSpriteChange(GameObject cursorGameObject, RectTransform transform)
     {
         //オブジェクトがアクティブなときのみ実行
         if (cursorGameObject.activeSelf)
@@ -98,11 +193,13 @@ public class CursorDraw : MonoBehaviour
             var ray = _camera.ScreenPointToRay(transform.position);
 
             //オブジェクトにあたったときにtrueが返ってくる
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity,_layerMask))
+            if (Physics.Raycast(ray.origin, ray.direction, out hit, Mathf.Infinity, _playerLayerMask,
+                                QueryTriggerInteraction.Ignore))
             {
-                    return true;
+                return true;
             }
         }
+
         return false;
     }
 
@@ -114,7 +211,8 @@ public class CursorDraw : MonoBehaviour
     /// <param name="token">UniTaskのキャンセルトークン</param>
     /// <param name="image"></param>
     /// <param name="animationSprites"></param>
-    private async UniTaskVoid CursorLockOnAnimation(CancellationToken token, Image image, IReadOnlyList<Sprite> animationSprites)
+    private async UniTaskVoid CursorLockOnAnimation(CancellationToken token, Image image,
+        IReadOnlyList<Sprite> animationSprites)
     {
         SoundManager.Instance.PlaySe(SoundDef.CursorLocked, .8f);
 
@@ -131,6 +229,7 @@ public class CursorDraw : MonoBehaviour
                 image.sprite = animationSprites[i];
                 i++;
             }
+
             time += Time.deltaTime;
             await UniTask.Yield();
         }
@@ -142,7 +241,8 @@ public class CursorDraw : MonoBehaviour
     /// <param name="token">UniTaskのキャンセルトークン</param>
     /// <param name="image"></param>
     /// <param name="animationSprites"></param>
-    private async UniTaskVoid CursorUnlockOnAnimation(CancellationToken token, Image image, IReadOnlyList<Sprite> animationSprites)
+    private async UniTaskVoid CursorUnlockOnAnimation(CancellationToken token, Image image,
+        IReadOnlyList<Sprite> animationSprites)
     {
         //スプライトを初期化
         image.sprite = animationSprites[animationSprites.Count - 1];
@@ -157,10 +257,12 @@ public class CursorDraw : MonoBehaviour
                 image.sprite = animationSprites[i];
                 i--;
             }
+
             time += Time.deltaTime;
             await UniTask.Yield();
         }
     }
+
     #endregion
 
 
@@ -197,7 +299,7 @@ public class CursorDraw : MonoBehaviour
     private void DrawSpriteAnimationL(bool isLockOn)
     {
         //nullチェック
-        if (isLockOn  && cursorStatusL != CursorStatus.LockOn)
+        if (isLockOn && cursorStatusL != CursorStatus.LockOn)
         {
             _ctsL.Cancel();
             _ctsL = new CancellationTokenSource();

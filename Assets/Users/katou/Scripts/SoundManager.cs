@@ -5,7 +5,7 @@ using UnityEngine.AddressableAssets;
 using Cysharp.Threading.Tasks;
 using UniRx;
 
-public class SoundManager : SingletonMonoBehaviour<SoundManager>
+public class SoundManager : SingletonMonoBehaviour<SoundManager>, IAsyncInitialize
 {
     public enum SoundType
     {
@@ -24,6 +24,8 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
     //BGM再生
     public void PlayBgm(MusicDef target,float volume = 1f,bool isLoop = false,float fadeTime = 0f)
     {
+        if (!CanPlayable) return;
+
         BGMSource.clip = BGMClips[target];
         BGMSource.loop = isLoop;
         BGMSource.volume = volume;
@@ -40,6 +42,8 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
     //SE再生
     public void PlaySe(SoundDef target,float volume = 1f)
     {
+        if (!CanPlayable) return;
+
         SESource.PlayOneShot(SEClips[target],volume);
     }
 
@@ -50,8 +54,10 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
     }
 
     // Start is called before the first frame update
-    async void Awake()
+    protected override async void Awake()
     {
+        base.Awake();
+
         SESource = gameObject.AddComponent<AudioSource>();
         SESource.playOnAwake = false;
         BGMSource = gameObject.AddComponent<AudioSource>();
@@ -97,5 +103,10 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
         };
 
         return isPlaying;
+    }
+
+    public UniTask WaitForInitialize()
+    {
+        return UniTask.WaitUntil(() => CanPlayable);
     }
 }

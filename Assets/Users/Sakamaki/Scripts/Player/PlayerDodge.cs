@@ -16,13 +16,6 @@ public partial class PlayerMovement
         // 消費スタミナ分スタミナを減らす
         /*PlayerStatus.playerSp -= staminaReduceNum;*/
 
-        // 空中にいるかどうか
-        if (!PlayerGrounded.isGrounded)
-        {
-            // 空中にいたら回避スピードを半分にする
-            dashSpeed /= 2;
-        }
-
         // 回避用のvector3変数を用意
         Vector3 dodgeVelocity = _moveForward * dashSpeed;
 

@@ -10,7 +10,7 @@ public sealed class LobbyController : SingletonMonoBehaviour<LobbyController>
     private LobbyStateManager stateManager;
 
     [SerializeField]
-    private CanvasGroup confirmCanvasGroup;
+    private MissionBoardView missionBoardView;
 
     [SerializeField, Header("依頼選択の確認画面表示のフェード時間 (秒)")]
     private float confirmViewFadeDuration;
@@ -21,18 +21,23 @@ public sealed class LobbyController : SingletonMonoBehaviour<LobbyController>
 
     public LobbyStateManager StateManager => stateManager;
 
+    public MissionBoardView MissionBoardView => missionBoardView;
+
     private void Start()
     {
         _broker.AddTo(this);
         EventReceiver();
 
-        confirmCanvasGroup.alpha = 0f;
+        missionBoardView.BoardCanvasGroup.alpha          = 0f;
+        missionBoardView.BoardCanvasGroup.interactable   = false;
+        missionBoardView.ConfirmCanvasGroup.alpha        = 0f;
+        missionBoardView.ConfirmCanvasGroup.interactable = false;
 
         // B押下でのタイトルへ戻る動作
         this.UpdateAsObservable()
             .Where(_ => SwitchInputManager.Instance.GetKeyDown(SwitchInputManager.JoyConButton.B))
-            .Where(_ => stateManager.State != LobbyStateManager.LobbyState.MissionSelected) // 依頼選択中ではない
-            .Take(1)
+            .Where(_ => stateManager.HasState(LobbyStateManager.LobbyState.MissionBoardOpened)) // 掲示板表示中
+            .Where(_ => !stateManager.HasState(LobbyStateManager.LobbyState.MissionSelected))   // 依頼選択中ではない
             .Subscribe(_ => OnBPressed())
             .AddTo(this);
 
@@ -48,15 +53,21 @@ public sealed class LobbyController : SingletonMonoBehaviour<LobbyController>
 
     private void OnBPressed()
     {
-        FadeContllor2.Instance.LoadScene(1f, GameScene.Title);
+        stateManager.RemoveState(LobbyStateManager.LobbyState.MissionBoardOpened);
+        stateManager.AddState(LobbyStateManager.LobbyState.Normal);
+        PlayerInputEventEmitter.Instance.Broker.Publish(
+            PlayerEvent.OnStateChangeRequest.GetEvent(
+                PlayerStatus.PlayerState.UIHandling, PlayerStateChangeOptions.Delete, null, null));
+
+        missionBoardView.BoardCanvasGroup.interactable = false;
+        missionBoardView.BoardCanvasGroup.ToggleFade(false, .5f).Forget();
     }
 
     private async void OnMissionSelected(LobbyEvent.OnMissionSelected data)
     {
         CancellationTokenSource cts = new();
-        stateManager.State = LobbyStateManager.LobbyState.MissionSelected;
 
-        await ToggleConfirmView(true, confirmCanvasGroup, confirmViewFadeDuration);
+        await missionBoardView.ConfirmCanvasGroup.ToggleFade(true, confirmViewFadeDuration);
 
         // 選択依頼確定処理
         UniTask confirmTask = UniTask.Defer(async () =>
@@ -80,30 +91,11 @@ public sealed class LobbyController : SingletonMonoBehaviour<LobbyController>
 
             cts.Cancel();
 
-            await ToggleConfirmView(false, confirmCanvasGroup, confirmViewFadeDuration);
+            await missionBoardView.ConfirmCanvasGroup.ToggleFade(false, confirmViewFadeDuration);
 
             _broker.Publish(LobbyEvent.OnMissionSelectCancelled.GetEvent());
         });
 
         await UniTask.WhenAny(confirmTask, cancelTask);
-    }
-
-    private async UniTask ToggleConfirmView(bool isShow, CanvasGroup target, float fadeTime)
-    {
-        System.Func<bool> breakCond = isShow
-                                          ? () => target.alpha < 1
-                                          : () => target.alpha > 0;
-
-        float fadingTime = 0f;
-
-        while (breakCond())
-        {
-            await UniTask.Yield();
-
-            fadingTime += Time.deltaTime;
-            target.alpha = isShow
-                               ? fadingTime / fadeTime
-                               : 1f - fadingTime / fadeTime;
-        }
     }
 }

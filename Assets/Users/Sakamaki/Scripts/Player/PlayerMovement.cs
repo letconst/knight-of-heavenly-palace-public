@@ -13,9 +13,6 @@ public partial class PlayerMovement : MonoBehaviour
     [SerializeField, Header("正面設定を行うカメラオブジェクト")]
     private GameObject _cameraObject;
 
-    [Header("回避処理部分")]
-    [Tooltip("回避を行う際に必要なスタミナ")] public static int _requestDodgeSp = 5;
-    [Tooltip("回避が可能になる間隔")] public static float _dodgeIntervalTime = 1f;
     private Rigidbody rigidbody;
 
     // プレイヤーの計算後速度(向きとか)
@@ -32,22 +29,37 @@ public partial class PlayerMovement : MonoBehaviour
         inputBroker.Receive<PlayerEvent.Input.OnJump>()
             .Subscribe(x =>
             {
-                Jump(PlayerStatus.jumpPower, rigidbody);
+                Jump(PlayerStatus.playerMasterData.BaseJumpPower, rigidbody);
 
                 // ステートチェンジイベントの発行
                 inputBroker.Publish(PlayerEvent.OnStateChangeRequest
-                    .GetEvent(PlayerStatus.PlayerState.Jump, true));
+                    .GetEvent(PlayerStatus.PlayerState.Jump, PlayerStateChangeOptions.Add,
+                        null, null));
             }).AddTo(this);
 
         // 回避
         inputBroker.Receive<PlayerEvent.Input.OnDodge>()
             .Subscribe(x =>
             {
-                Dodge(PlayerStatus.dodgeSpeed, rigidbody);
+                float dodgeSpeed = 0f;
+
+                // 地上にいる場合の回避速度
+                if (PlayerGrounded.isGrounded)
+                {
+                    dodgeSpeed = PlayerStatus.playerMasterData.NormalDodgeInfo.DodgeSpeed;
+                }
+                // 空中にいる場合の回避速度
+                else
+                {
+                    dodgeSpeed = PlayerStatus.playerMasterData.InAirDodgeInfo.DodgeSpeed;
+                }
+
+                Dodge(dodgeSpeed, rigidbody);
 
                 // ステートチェンジイベントの発行
                 inputBroker.Publish(PlayerEvent.OnStateChangeRequest
-                    .GetEvent(PlayerStatus.PlayerState.Dodge, true));
+                    .GetEvent(PlayerStatus.PlayerState.Dodge, PlayerStateChangeOptions.Add,
+                        null,null));
             }).AddTo(this);
     }
 
@@ -56,12 +68,18 @@ public partial class PlayerMovement : MonoBehaviour
         // 毎フレーム初期化 (stoppingの判定をとるため)
         _moveForward = Vector3.zero;
 
-        // ぶら下がり状態のときは移動を受け付けない
+        // ぶら下がり・転移・UI操作状態のときは移動を受け付けない
         if (!PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL) &&
-            !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR))
+            !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR) &&
+            !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.TransferringL) &&
+            !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.TransferringR) &&
+            !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling))
         {
-            // 移動処理
-            Moved(PlayerStatus.moveSpeed, rigidbody);
+            if (PlayerStatus.playerMasterData)
+            {
+                // 移動処理
+                Moved(PlayerStatus.playerMasterData.BaseMoveSpeed, rigidbody);
+            }
         }
 
         // 落下し始めた際にイベント発行
@@ -70,7 +88,8 @@ public partial class PlayerMovement : MonoBehaviour
             rigidbody.velocity.y < 0)                                        // 移動推力が下方向
         {
             PlayerInputEventEmitter.Instance.Broker.Publish(
-                PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.Falling, true));
+                PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.Falling, PlayerStateChangeOptions.Add,
+                    null, null));
 
             // TODO: OnStateChangeRequestのコールバックとかにしたい (ステート変更に成功したかわからないため)
             PlayerInputEventEmitter.Instance.Broker.Publish(PlayerEvent.OnFalling.GetEvent());

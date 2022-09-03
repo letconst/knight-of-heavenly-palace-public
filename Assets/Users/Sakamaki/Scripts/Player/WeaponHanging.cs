@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 /// <summary>
@@ -8,7 +7,7 @@ public partial class WeaponThrowing
 {
     [SerializeField, Tooltip("どれくらい剣にたいしてプレイヤーを着地させるか")]
     private Vector3 _compensationPostion;
-    
+
     /// <summary>
     /// ぶら下がり状態の処理関数
     /// </summary>
@@ -22,30 +21,34 @@ public partial class WeaponThrowing
                 if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR))
                 {
                     ResetSword(PlayerInputEvent.PlayerHand.Right, false);
-                    _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL, true));
+                    _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL,
+                        PlayerStateChangeOptions.Add, null, null));
                 }
                 else
-                    _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL, true));
+                    _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL,
+                        PlayerStateChangeOptions.Add, null, null));
                 break;
             case PlayerInputEvent.PlayerHand.Right:
                 if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL))
                 {
                     ResetSword(PlayerInputEvent.PlayerHand.Left, false);
-                    _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR, true));
+                    _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR,
+                        PlayerStateChangeOptions.Add, null, null));
                 }
                 else
-                    _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR, true));
+                    _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR,
+                        PlayerStateChangeOptions.Add, null, null));
                 break;
             default:
                 break;
         }
-        
-        
+
+
         // まず斜面をどう求めていくかを考える必要がありそう
         // まず、斜面がぶら下がり状態の斜面条件を満たしているか
         // if(斜面が足りているか) return;
         // 足りていたら処理を行う
-        
+
         // hitしたオブジェクトの座標をプレイヤー座標に代入
         _playerObject.transform.position = rayHitPoint + _compensationPostion;
 
@@ -63,18 +66,20 @@ public partial class WeaponThrowing
         // つかみ状態でステートがついているのでステートを見てリセット処理
         if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL))
         {
-            _isThrowL = false;
+            _leftWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Left);
-            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL, false));
+            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL,
+                PlayerStateChangeOptions.Delete, null, null));
         }
         else if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR))
         {
-            _isThrowR = false;
+            _rightWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Right);
-            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR, false));
+            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR,
+                PlayerStateChangeOptions.Delete, null, null));
         }
     }
-    
+
     /// <summary>
     /// ぶら下がり状態を解除して武器を投げれるように修正を行う関数 (actionInfoで解除タイプ)
     /// </summary>
@@ -88,15 +93,17 @@ public partial class WeaponThrowing
         // つかみ状態でステートがついているのでステートを見てリセット処理
         if (actionInfo == PlayerInputEvent.PlayerHand.Left)
         {
-            _isThrowL = false;
+            _leftWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Left);
-            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL, false));
+            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL,
+                PlayerStateChangeOptions.Delete, null, null));
         }
         else if (actionInfo == PlayerInputEvent.PlayerHand.Right)
         {
-            _isThrowR = false;
+            _rightWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Right);
-            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR, false));
+            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR,
+                PlayerStateChangeOptions.Delete, null, null));
         }
     }
 }

@@ -6,26 +6,33 @@ namespace KOHP.MasterData
 {
     public sealed partial class MasterDataEditor : EditorWindow
     {
+        private static EditorWindow _window;
+
         private static readonly Dictionary<RenderPage, EditorPage> _renderPageDict = new()
         {
             { RenderPage.Home, new EditorPage(HomeGUI, null) },
             { RenderPage.Enemy, new EditorPage(EnemyGUI, OnToggledEnemy) },
             { RenderPage.Item, new EditorPage(ItemGUI, null) },
-            { RenderPage.Player, new EditorPage(PlayerGUI, null) },
+            { RenderPage.Player, new EditorPage(PlayerGUI, OnToggledPlayer) },
             { RenderPage.Weapon, new EditorPage(WeaponGUI, null) }
         };
 
         private static readonly EditorPageManager _pageManager = new(_renderPageDict);
 
+        /// <summary>
+        /// <see cref="MasterDataEditor"/> のEditorWindow
+        /// </summary>
+        private static EditorWindow Window => _window ? _window : _window = GetWindow<MasterDataEditor>();
+
         [MenuItem("KOHP Tools/マスターデータエディター")]
         private static void ShowWindow()
         {
-            var window = GetWindow<MasterDataEditor>();
-            window.titleContent = new GUIContent(EditorConstants.ToolName);
-            window.minSize = new Vector2(16 * EditorConstants.WindowSizeRatio,
-                                         9  * EditorConstants.WindowSizeRatio);
+            _window              = GetWindow<MasterDataEditor>();
+            _window.titleContent = new GUIContent(EditorConstants.ToolName);
+            _window.minSize = new Vector2(16 * EditorConstants.WindowSizeRatio,
+                                          9  * EditorConstants.WindowSizeRatio);
 
-            window.Show();
+            _window.Show();
         }
 
         private void OnGUI()

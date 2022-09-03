@@ -21,7 +21,7 @@ public class MissionManager : MonoBehaviour
 
     private void OnClickMissionButton()
     {
-        if (LobbyController.Instance.StateManager.State == LobbyStateManager.LobbyState.MissionSelected)
+        if (LobbyController.Instance.StateManager.HasState(LobbyStateManager.LobbyState.MissionSelected))
             return;
 
         acceptedMission = new Mission("依頼1",1);
@@ -31,7 +31,7 @@ public class MissionManager : MonoBehaviour
 
     private void OnClickMission2Button()
     {
-        if (LobbyController.Instance.StateManager.State == LobbyStateManager.LobbyState.MissionSelected)
+        if (LobbyController.Instance.StateManager.HasState(LobbyStateManager.LobbyState.MissionSelected))
             return;
 
         acceptedMission = new Mission("依頼2", 2);
@@ -41,7 +41,7 @@ public class MissionManager : MonoBehaviour
 
     private void OnClickMissionTutorialButton()
     {
-        if (LobbyController.Instance.StateManager.State == LobbyStateManager.LobbyState.MissionSelected)
+        if (LobbyController.Instance.StateManager.HasState(LobbyStateManager.LobbyState.MissionSelected))
             return;
 
         acceptedMission = new Mission("チュートリアル", 3);

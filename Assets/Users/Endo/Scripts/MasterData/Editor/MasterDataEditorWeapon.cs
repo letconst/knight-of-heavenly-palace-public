@@ -4,8 +4,8 @@
     {
         private static void WeaponGUI()
         {
-            EditorUtility.SideMenuGUI(_pageManager.CurrentPage);
-            EditorUtility.PanelGUI(LeftContent, RightContent);
+            EditorUtility.SideMenuGUI(Window, _pageManager.CurrentPage);
+            EditorUtility.PanelGUI(Window, LeftContent, RightContent);
 
             void LeftContent()
             {

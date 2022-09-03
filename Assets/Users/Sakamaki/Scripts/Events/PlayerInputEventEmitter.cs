@@ -50,7 +50,7 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             // イベント発行が可能かどうかの判別
 
             // UI操作中かどうかの判別
-            // if (/* UI操作中か */) return;
+            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling)) return;
 
             // 発行可能なら、準備をして発行
 
@@ -61,16 +61,18 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             };
 
             // 左手の投擲モードなら
-            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingL))
+            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingMode))
             {
                 // イベントを発行(通知を行う)
-                _broker.Publish(PlayerEvent.Input.OnSwitchedThrow.GetEvent(actionInfo));
+                // 攻撃モードに変更
+                _broker.Publish(PlayerEvent.Input.OnSwitchedAttack.GetEvent());
             }
             // 攻撃モードなら
-            else if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.AttackL))
+            else if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.AttackMode))
             {
                 // イベントを発行
-                _broker.Publish(PlayerEvent.Input.OnSwitchedThrow.GetEvent(actionInfo));
+                // 投擲モードに変更
+                _broker.Publish(PlayerEvent.Input.OnSwitchedThrow.GetEvent());
             }
         }
         // 右入力
@@ -79,7 +81,7 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             /* イベントを発行可能（操作を実行可能）かを、まず確認する */
 
             // UI操作中なら終了
-            // if (/* UI操作中か */) return;
+            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling)) return;
 
             var actionInfo = new PlayerActionInfo()
             {
@@ -87,14 +89,14 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             };
 
             // 投擲モードなら
-            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingR))
+            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingMode))
             {
-                _broker.Publish(PlayerEvent.Input.OnSwitchedAttack.GetEvent(actionInfo));
+                _broker.Publish(PlayerEvent.Input.OnSwitchedAttack.GetEvent());
             }
             // 攻撃モードなら
-            else if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.AttackR))
+            else if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.AttackMode))
             {
-                _broker.Publish(PlayerEvent.Input.OnSwitchedThrow.GetEvent(actionInfo));
+                _broker.Publish(PlayerEvent.Input.OnSwitchedThrow.GetEvent());
             }
         }
         // ZLの入力
@@ -143,15 +145,17 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             float switchInputAbs = Mathf.Abs(switchInput.magnitude);
 
             // UI操作中かどうか
-            /*if (UI操作中)
+            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling))
             {
-                _broker.Publish(GameEvent.UI.Input.OnBack.GetEvent());
-            }*/
+                // _broker.Publish(GameEvent.UI.Input.OnBack.GetEvent());
+
+                return;
+            }
             // 回避可能か (2022.07.01 デットゾーン対応)
             if (switchInputAbs > PlayerStatus.ControllerDeadZone.magnitude)
             {
                 // スタミナの減少値よりプレイヤーのスタミナがあったらイベント発行
-                if (PlayerStatus.playerSp > PlayerMovement._requestDodgeSp)
+                if (PlayerStatus.playerSp > PlayerStatus.playerMasterData.NormalDodgeInfo.RequireStaminaPoint)
                 {
                     // タイマーが0以下だった場合イベントの発行
                     if (_dodgeCheckTime <= 0.0f)
@@ -184,6 +188,10 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
         // X入力
         if (_switchInput.GetKeyDown(SwitchInputManager.JoyConButton.X))
         {
+            // UI操作中かどうか
+            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling))
+                return;
+
             /*if (抜刀中かどうか 壁に張り付いてるかどうか) return;*/
             if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.SwordPulling) ||
                 PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR) ||
@@ -191,7 +199,8 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
 
             // 抜刀のイベントを発行
             _broker.Publish(PlayerEvent.Input.OnPulling.GetEvent());
-            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.SwordPulling, true));
+            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.SwordPulling,
+                PlayerStateChangeOptions.Add, null, null));
         }
         // Y入力
         if (_switchInput.GetKeyDown(SwitchInputManager.JoyConButton.Y))
@@ -203,7 +212,8 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
 
             // 納刀のイベントを発行
             _broker.Publish(PlayerEvent.Input.OnDelivery.GetEvent());
-            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.SwordDelivery, true));
+            _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.SwordDelivery,
+                PlayerStateChangeOptions.Add, null, null));
         }
     }
 
@@ -213,6 +223,10 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
     /// <param name="actionInfo"></param>
     private void OnZLZRInput(PlayerActionInfo actionInfo)
     {
+        // UI操作中かどうか
+        if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling))
+            return;
+
         // if (魔法剣を装備しているか)
         {
             // 張り付き状態かどうか
@@ -224,16 +238,15 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             }*/
 
             // 投擲モード中かどうか
-            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingR) ||
-                PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingL))
+            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingMode))
             {
                 // 投擲入力イベントの発行
                 _broker.Publish(PlayerEvent.Input.OnThrowWeapon.GetEvent(actionInfo));
             }
-            else if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.SwordPulling))
+            /*else if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.SwordPulling))
             {
                 _broker.Publish(PlayerEvent.Input.OnThrowWeapon.GetEvent(actionInfo));
-            }
+            }*/
 
             // else if (必要魔力があるかどうか)
             {
@@ -260,7 +273,7 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             _dodgeCheckTime += Time.deltaTime;
         }
         // タイマーが回避の制限時間を超えたら初期化
-        if (!(_dodgeCheckTime >= PlayerMovement._dodgeIntervalTime)) return;
+        if (PlayerStatus.playerMasterData && !(_dodgeCheckTime >= PlayerStatus.playerMasterData.DodgeInterval)) return;
         _dodgeCheckTime = 0.0f;
         _isTimerActive = false;
     }

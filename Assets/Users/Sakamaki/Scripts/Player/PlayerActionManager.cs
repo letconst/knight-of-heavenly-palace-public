@@ -40,5 +40,21 @@ public class PlayerActionManager : SingletonMonoBehaviour<PlayerActionManager>
                     _weaponThrowing.ResetSword(x.ActionInfo.actHand, true);
                 }
             }).AddTo(this);
+
+        // 攻撃モードに変更
+        _broker.Receive<PlayerEvent.Input.OnSwitchedAttack>()
+            .Subscribe(_ =>
+            {
+                _broker.Publish(PlayerEvent.OnStateChangeRequest.
+                    GetEvent(PlayerStatus.PlayerState.AttackMode, PlayerStateChangeOptions.Add, null, null));
+            });
+        
+        // 投擲モードに変更
+        _broker.Receive<PlayerEvent.Input.OnSwitchedThrow>()
+            .Subscribe(_ =>
+            {
+                _broker.Publish(PlayerEvent.OnStateChangeRequest.
+                    GetEvent(PlayerStatus.PlayerState.ThrowingMode, PlayerStateChangeOptions.Add, null, null));
+            });
     }
 }

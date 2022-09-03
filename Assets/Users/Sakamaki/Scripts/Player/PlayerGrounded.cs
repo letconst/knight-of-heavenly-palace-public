@@ -52,7 +52,8 @@ public class PlayerGrounded : MonoBehaviour
         {
             // ジャンプのフラグを落とす
             PlayerInputEventEmitter.Instance.Broker.Publish(
-                PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.Jump, false));
+                PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.Jump, PlayerStateChangeOptions.Delete,
+                    null, null));
         }
     }
 }

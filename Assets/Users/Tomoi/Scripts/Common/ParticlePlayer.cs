@@ -7,6 +7,8 @@ public class ParticlePlayer : MonoBehaviour
     private bool _isEffectLoop = false;
     private EffectType _effectType;
 
+    private System.Action _onFinish;
+
     private ParticleSystem Particle =>
         //遅延初期化に変更
         _particleSystem ? _particleSystem : (_particleSystem = GetComponent<ParticleSystem>());
@@ -53,8 +55,9 @@ public class ParticlePlayer : MonoBehaviour
     /// <param name="position">再生する座標</param>
     /// <param name="rotation">再生する際の回転</param>
     /// <param name="time">再生時間 入力なしの場合1ループして削除</param>
+    /// <param name="onFinish">再生終了時のコールバック</param>
     /// <returns>再生終了通知</returns>
-    public void PlayEffect(Vector3 position, Quaternion rotation)
+    public void PlayEffect(Vector3 position, Quaternion rotation, System.Action onFinish = null)
     {
         SetPosition(position);
         SetRotation(rotation);
@@ -62,19 +65,21 @@ public class ParticlePlayer : MonoBehaviour
 
         var main = Particle.main;
         main.loop = _isEffectLoop;
-        
+        _onFinish = onFinish;
+
         //エフェクトを再生
         Particle.Play();
     }
-    
+
     /// <summary>
     /// エフェクトを再生する
     /// </summary>
     /// <param name="position">再生するグローバル座標</param>
     /// <param name="rotation">再生する際の回転</param>
     /// <param name="time">再生時間 入力なしの場合1ループして削除</param>
+    /// <param name="onFinish">再生終了時のコールバック</param>
     /// <returns>再生終了通知</returns>
-    public async UniTaskVoid PlayEffect(Vector3 position, Quaternion rotation, float time)
+    public async UniTaskVoid PlayEffect(Vector3 position, Quaternion rotation, float time, System.Action onFinish = null)
     {
         SetlocalPosition(position);
         SetlocalRotation(rotation);
@@ -82,15 +87,18 @@ public class ParticlePlayer : MonoBehaviour
 
         var main = Particle.main;
         main.loop = _isEffectLoop;
+        _onFinish = onFinish;
+
         //エフェクトを再生
         Particle.Play();
 
         //time秒後にエフェクトを止める
-        await UniTask.Delay((int)(time * 1000)); 
+        await UniTask.Delay((int)(time * 1000));
         Particle.Stop();
     }
-    
-       
+
+    #region 親オブジェクトの変更バージョン
+
     /// <summary>
     /// ループエフェクトを再生する
     /// </summary>
@@ -98,53 +106,61 @@ public class ParticlePlayer : MonoBehaviour
     /// <param name="rotation">再生する際の回転</param>
     /// <param name="parent">変更先の親オブジェクト</param>
     /// <param name="time">再生時間 入力なしの場合1ループして削除</param>
+    /// <param name="onFinish">再生終了時のコールバック</param>
     /// <returns>再生終了通知</returns>
-    public async UniTaskVoid PlayEffect(Vector3 position, Quaternion rotation,Transform parent, float time)
+    public async UniTaskVoid PlayEffect(Vector3 position, Quaternion rotation,Transform parent, float time,
+                                        System.Action onFinish = null)
     {
         transform.parent = parent;
-        SetlocalPosition(position);
-        SetlocalRotation(rotation);
+        transform.localPosition = position;
+        transform.localRotation = rotation;
         _isEffectLoop = true;
 
         var main = Particle.main;
         main.loop = _isEffectLoop;
+        _onFinish = onFinish;
+
         //エフェクトを再生
         Particle.Play();
 
         //time秒後にエフェクトを止める
-        await UniTask.Delay((int)(time * 1000)); 
+        await UniTask.Delay((int)(time * 1000));
         Particle.Stop();
     }
-    #region 親オブジェクトの変更バージョン
 
     /// <summary>
     /// エフェクトを再生する
     /// </summary>
     /// <param name="position">再生する座標</param>
     /// <param name="rotation">再生する際の回転</param>
-    /// <param name="time">再生時間 入力なしの場合1ループして削除</param>
     /// <param name="parent">変更先の親オブジェクト</param>
+    /// <param name="onFinish">再生終了時のコールバック</param>
     /// <returns>再生終了通知</returns>
-    public void PlayEffect(Vector3 position, Quaternion rotation,Transform parent)
+    public void PlayEffect(Vector3 position, Quaternion rotation,Transform parent, System.Action onFinish = null)
     {
         transform.parent = parent;
-        SetPosition(position);
-        SetRotation(rotation);
+        transform.localPosition = position;
+        transform.localRotation = rotation;
         _isEffectLoop = false;
 
         var main = Particle.main;
         main.loop = _isEffectLoop;
-        
+        _onFinish = onFinish;
+
         //エフェクトを再生
         Particle.Play();
     }
     #endregion
-    
+
     /// <summary>
     /// パーティクルの再生が終わった時に実行される
     /// </summary>
     private void OnParticleSystemStopped(){
         //パーティクルをプールに返す
         EffectManager.Instance.ReturnPool(_effectType,this);
+
+        // コールバック実行
+        _onFinish?.Invoke();
+        _onFinish = null;
     }
 }

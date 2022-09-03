@@ -8,15 +8,31 @@ public class PlayerStateManager : MonoBehaviour
 {
     private IMessageBroker _inputBroker;
 
+    private Rigidbody rb;
+
+    private void Awake()
+    {
+        PlayerStatus.playerState = PlayerStatus.PlayerState.None;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        // 抜刀にしておく
+        // 抜刀と投擲モードにしておく
         StateChange(PlayerStatus.PlayerState.SwordPulling);
+        StateChange(PlayerStatus.PlayerState.ThrowingMode);
 
         _inputBroker = PlayerInputEventEmitter.Instance.Broker;
 
+        rb = GetComponent<Rigidbody>();
         StateChangeEmitter();
+    }
+
+    private void Update()
+    {
+        //MoveAnimation
+        //なにかいい処理があったら書き換えてください
+        PlayerAnimationManager.Instance.IdleAndRun(rb.velocity.magnitude);
     }
 
     /// <summary>
@@ -28,7 +44,7 @@ public class PlayerStateManager : MonoBehaviour
             .Subscribe(x =>
             {
                 // trueで飛んできて追加するだった場合
-                if (x.IsAdd)
+                if (x.StateChangeOptions == PlayerStateChangeOptions.Add)
                 {
                     // 各種の例外処理を書く
                     switch (x.State)
@@ -37,73 +53,138 @@ public class PlayerStateManager : MonoBehaviour
                             break;
                         // 移動関係処理
                         case PlayerStatus.PlayerState.Standing:
-                            if (HasFlag(PlayerStatus.PlayerState.HangingR)) return;
+                            if (HasFlag(PlayerStatus.PlayerState.HangingR))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
                             // 止まっているということは移動していないので移動のステートを消す
                             RemoveFlag(PlayerStatus.PlayerState.Move);
 
-                            PlayerMotionController.Instance.SetFloat("IdleAndRun", 0f);
+                            //PlayerAnimationManager.Instance.IdleAndRun(rb.velocity.magnitude);
+                            //PlayerMotionController.Instance.SetFloat("IdleAndRun", 0f);
                             break;
                         case PlayerStatus.PlayerState.Move:
                             // ぶら下がり状態
-                            if (HasFlag(PlayerStatus.PlayerState.HangingR)) return;
+                            if (HasFlag(PlayerStatus.PlayerState.HangingR))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
                             // 逆に移動しているということは静止していないので停止のステートを消す
                             RemoveFlag(PlayerStatus.PlayerState.Standing);
 
-                            PlayerMotionController.Instance.SetFloat("IdleAndRun", 1f);
+                            //PlayerAnimationManager.Instance.IdleAndRun(rb.velocity.magnitude);
+                            //PlayerMotionController.Instance.SetFloat("IdleAndRun", 1f);
                             break;
                         case PlayerStatus.PlayerState.Jump:
                             // ぶら下がり状態
-                            if (HasFlag(PlayerStatus.PlayerState.HangingR)) return;
+                            if (HasFlag(PlayerStatus.PlayerState.HangingR))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
                             break;
                         case PlayerStatus.PlayerState.Dodge:
                             // ぶら下がり状態じゃなければ地上回避モーション再生
                             if (!HasFlag(PlayerStatus.PlayerState.HangingL) && !HasFlag(PlayerStatus.PlayerState.HangingR))
                             {
-                                PlayerMotionController.Instance.PlayTriggerMotion(PlayerMotionController.MotionType.DodgeInGround);
+                                PlayerAnimationManager.Instance.DodgeInGround();
+                                //PlayerMotionController.Instance.PlayTriggerMotion(PlayerMotionController.MotionType.DodgeInGround);
                             }
                             break;
                         case PlayerStatus.PlayerState.HangingR:
                             RemoveFlag(PlayerStatus.PlayerState.Move);
-                            PlayerMotionController.Instance.SetFloat("IdleAndRun", 0f);
+
+                            //PlayerAnimationManager.Instance.IdleAndRun(rb.velocity.magnitude);
+                            //PlayerMotionController.Instance.SetFloat("IdleAndRun", 0f);
                             break;
                         case PlayerStatus.PlayerState.HangingL:
                             RemoveFlag(PlayerStatus.PlayerState.Move);
-                            PlayerMotionController.Instance.SetFloat("IdleAndRun", 0f);
+
+                            //PlayerAnimationManager.Instance.IdleAndRun(rb.velocity.magnitude);
+                            //PlayerMotionController.Instance.SetFloat("IdleAndRun", 0f);
                             break;
                         case PlayerStatus.PlayerState.Falling:
                             break;
                         // 共通アクション
                         case PlayerStatus.PlayerState.SwordPulling:
-                            if (HasFlag(PlayerStatus.PlayerState.SwordPulling)) return;
+                            if (HasFlag(PlayerStatus.PlayerState.SwordPulling))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
                             RemoveFlag(PlayerStatus.PlayerState.SwordDelivery);
                             SoundManager.Instance.PlaySe(SoundDef.SwitchSwordMode);
                             break;
                         case PlayerStatus.PlayerState.SwordDelivery:
-                            if (HasFlag(PlayerStatus.PlayerState.SwordDelivery)) return;
+                            if (HasFlag(PlayerStatus.PlayerState.SwordDelivery))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
                             RemoveFlag(PlayerStatus.PlayerState.SwordPulling);
                             SoundManager.Instance.PlaySe(SoundDef.SwitchSwordMode);
                             break;
                         // 攻撃系統 (右手)
                         case PlayerStatus.PlayerState.AttackR:
-                            if (HasFlag(PlayerStatus.PlayerState.SwordPulling)) return;
+                            if (HasFlag(PlayerStatus.PlayerState.SwordPulling))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
                             break;
                         case PlayerStatus.PlayerState.ThrowingR:
                             break;
                         // 攻撃系統 (左手)
                         case PlayerStatus.PlayerState.AttackL:
-                            if (HasFlag(PlayerStatus.PlayerState.SwordPulling)) return;
+                            if (HasFlag(PlayerStatus.PlayerState.SwordPulling))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
                             break;
                         case PlayerStatus.PlayerState.ThrowingL:
                             break;
+                        case PlayerStatus.PlayerState.ThrowingMode:
+                            if (HasFlag(PlayerStatus.PlayerState.ThrowingMode))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
+                            // 投擲モードになるということは攻撃モードではないのでフラグを削除
+                            RemoveFlag(PlayerStatus.PlayerState.AttackMode);
+                            break;
+                        case PlayerStatus.PlayerState.AttackMode:
+                            if (HasFlag(PlayerStatus.PlayerState.AttackMode))
+                            {
+                                x.OnChanged?.Invoke();
+                                return;
+                            }
+                            // 攻撃モードになるということは投擲モードではないのでフラグを削除
+                            RemoveFlag(PlayerStatus.PlayerState.ThrowingMode);
+                            break;
+                        default:
+                            break;
                     }
-
                     // ステートの追加 (変更を行う)
                     StateChange(x.State);
+
+                    // ステートの変更を行った後変更をした後のイベントを発行する
+                    _inputBroker.Publish(PlayerEvent.OnStateChanged.GetEvent(x.State));
+
+                    // OnChanged実行できることを通知
+                    // (nullで宣言されている場合エラー担ってしまうのでnull許容型に変更)
+                    x.OnChanged?.Invoke();
                 }
                 // falseで飛んできた場合remove
-                else if (!x.IsAdd)
+                else if (x.StateChangeOptions == PlayerStateChangeOptions.Delete)
                 {
                     RemoveFlag(x.State);
+
+                    // OnChanged実行できることを通知
+                    // (nullで宣言されている場合エラー担ってしまうのでnull許容型に変更)
+                    x.OnRejected?.Invoke();
                 }
             }).AddTo(this);
 

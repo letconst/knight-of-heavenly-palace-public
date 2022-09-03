@@ -9,12 +9,17 @@ public class TestEnemy : EnemyBase
         throw new System.NotImplementedException();
     }
 
+    protected override void OnDead()
+    {
+        throw new System.NotImplementedException();
+    }
+
     // Start is called before the first frame update
-  
+
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }

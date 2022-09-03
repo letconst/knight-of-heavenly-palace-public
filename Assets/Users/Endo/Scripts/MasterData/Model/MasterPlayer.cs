@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewPlayerData", menuName = "マスターデータ/プレイヤー")]
-public sealed class MasterPlayer : MasterDataBase
+public sealed partial class MasterPlayer : MasterDataBase
 {
+    #region ステータス情報
+
     [SerializeField, Header(MasterDataModelConstants.Player.MaxHitPointLabel)]
     private int maxHitPoint;
 
@@ -15,6 +17,12 @@ public sealed class MasterPlayer : MasterDataBase
     /// <summary>最大SP</summary>
     public int MaxStaminaPoint => maxStaminaPoint;
 
+    [SerializeField, Header(MasterDataModelConstants.Player.BaseJumpPowerLabel)]
+    private float baseJumpPower;
+
+    /// <summary>ジャンプ力</summary>
+    public float BaseJumpPower => baseJumpPower;
+
     [SerializeField, Header(MasterDataModelConstants.Player.BaseAutoStaminaRecoveryQuantity)]
     private int baseAutoStaminaRecoveryQuantity;
 
@@ -26,6 +34,32 @@ public sealed class MasterPlayer : MasterDataBase
 
     /// <summary>移動速度 (m/s)</summary>
     public float BaseMoveSpeed => baseMoveSpeed;
+
+    #endregion
+
+    #region 攻撃情報
+
+    [SerializeField, Header(MasterDataModelConstants.Player.AttackIntervalLabel)]
+    private float attackInterval;
+
+    /// <summary>攻撃を行う間隔</summary>
+    public float AttackInterval => attackInterval;
+
+    [SerializeField]
+    private float attackTargetFindRadius;
+
+    /// <summary>張り付き状態での攻撃時に攻撃対象を探す半径</summary>
+    public float AttackTargetFindRadius => attackTargetFindRadius;
+
+    #endregion
+
+    #region 回避情報
+
+    [SerializeField, Header(MasterDataModelConstants.Player.DodgeIntervalLabel)]
+    private float dodgeInterval;
+
+    /// <summary>回避を行う間隔</summary>
+    public float DodgeInterval => dodgeInterval;
 
     [SerializeField, Header(MasterDataModelConstants.Player.NormalDodgeInfoLabel)]
     private DodgeInformation normalDodgeInfo;
@@ -45,14 +79,16 @@ public sealed class MasterPlayer : MasterDataBase
     /// <summary>離脱回避に関する情報</summary>
     public DodgeInformation EscapingDodgeInfo => escapingDodgeInfo;
 
+    #endregion
+
     [System.Serializable]
     public sealed class DodgeInformation
     {
-        [SerializeField, Header(MasterDataModelConstants.DodgeInfo.MotionSpeedLabel)]
-        private float motionSpeed;
+        [SerializeField, Header(MasterDataModelConstants.DodgeInfo.DodgeSpeedLabel)]
+        private float dodgeSpeed;
 
-        /// <summary>モーション速度 (f)</summary>
-        public float MotionSpeed => motionSpeed;
+        /// <summary>回避速度</summary>
+        public float DodgeSpeed => dodgeSpeed;
 
         [SerializeField, Header(MasterDataModelConstants.DodgeInfo.RequireMagicPowerLabel)]
         private int requireMagicPower;

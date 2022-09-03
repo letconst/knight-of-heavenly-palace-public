@@ -17,7 +17,12 @@ public sealed class MainGameController : SingletonMonoBehaviour<MainGameControll
 
         missionTimer.IsTimerActive = true;
 
-        await UniTask.WaitUntil(() => SoundManager.Instance.CanPlayable);
+        // ロビーのUI操作ステートが残るため削除
+        PlayerInputEventEmitter.Instance.Broker.Publish(
+            PlayerEvent.OnStateChangeRequest.GetEvent(
+                PlayerStatus.PlayerState.UIHandling, PlayerStateChangeOptions.Delete, null, null));
+
+        await SoundManager.Instance.WaitForInitialize();
 
         SoundManager.Instance.StopBgm();
         SoundManager.Instance.PlayBgm(MusicDef.First);

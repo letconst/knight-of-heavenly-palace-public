@@ -5,8 +5,6 @@ namespace KOHP.MasterData
 {
     public sealed partial class MasterDataEditor
     {
-        private static Vector2 _enemyScrollPos;
-
         private static Editor           _enemyEditor;
         private static ScriptableObject _target;
         private static MasterEnemy[]    _enemyData;
@@ -16,13 +14,11 @@ namespace KOHP.MasterData
         /// </summary>
         private static void EnemyGUI()
         {
-            EditorUtility.SideMenuGUI(_pageManager.CurrentPage);
-            EditorUtility.PanelGUI(LeftContent, RightContent);
+            EditorUtility.SideMenuGUI(Window, _pageManager.CurrentPage);
+            EditorUtility.PanelGUI(Window, LeftContent, RightContent);
 
             void LeftContent()
             {
-                _enemyScrollPos = EditorGUILayout.BeginScrollView(_enemyScrollPos);
-
                 // TODO: 各データをグリッドでも表示したい（切り替え）
                 foreach (MasterEnemy data in _enemyData)
                 {
@@ -33,8 +29,6 @@ namespace KOHP.MasterData
                         _target = data;
                     }
                 }
-
-                EditorGUILayout.EndScrollView();
             }
 
             void RightContent()
