@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5780648858607297903}
   - component: {fileID: 12181967272929683}
   - component: {fileID: 5117421760855306089}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Dragon_body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 7856624702397303530, guid: 537de5fcbf187e24283fe97dbf180766, type: 3}
 --- !u!54 &5117421760855306089
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 5555262257666675070}
   - component: {fileID: 5754930745808635958}
   - component: {fileID: 5143463544825302844}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Dragon_horn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -209,7 +209,7 @@ GameObject:
   - component: {fileID: 4924677499202854812}
   - component: {fileID: 1135769439257579319}
   - component: {fileID: 800419128355658771}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: feather_tale1_pCube315
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -292,7 +292,7 @@ GameObject:
   - component: {fileID: 6609830504245371514}
   - component: {fileID: 5886928236763204614}
   - component: {fileID: 7399233857369469953}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: group21_pCube176
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -377,7 +377,7 @@ GameObject:
   - component: {fileID: 592622779708953093}
   - component: {fileID: 474196265378066914}
   - component: {fileID: 7720624089685782741}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: feather_wind_01_pCube200
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -491,7 +491,7 @@ GameObject:
   - component: {fileID: 1258382472314146715}
   - component: {fileID: 2274171588099537714}
   - component: {fileID: 706875834878337622}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: feather_tale1_pCube314
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -675,7 +675,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4654579218845798864}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: mouth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -708,7 +708,7 @@ GameObject:
   - component: {fileID: 5896335897484682216}
   - component: {fileID: 4617976852858366348}
   - component: {fileID: 2379420357855966388}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: eye
   m_TagString: Untagged
   m_Icon: {fileID: 0}

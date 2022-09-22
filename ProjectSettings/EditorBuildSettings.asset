@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Users/katou/Scenes/transition2.unity
     guid: 33b7fbd4c14aa5b4e922b9441561a86d
+  - enabled: 0
+    path: Assets/Users/katou/Scenes/Loading.unity
+    guid: 1d5ce6feaeb7b1e45916fa58dcbb5469
   - enabled: 1
     path: Assets/Scenes/MainGame.unity
     guid: b6daacb8791437d44b14b660d0748329
@@ -26,6 +29,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: ebaeef1210abe0e45a43fe5fe7a4bc1f
+  - enabled: 1
+    path: Assets/Scenes/Loading.unity
+    guid: 36f1c73d5498c094488ae2ce2918c51d
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: e49968811d36efc4fba455f887196ff6,
       type: 2}

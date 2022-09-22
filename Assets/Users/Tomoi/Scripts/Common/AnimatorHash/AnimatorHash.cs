@@ -1,4 +1,4 @@
-using UnityEngine; 
+using UnityEngine;
 /// <summary>Player</summary>
 public partial class AnimatorHash
 {
@@ -7,6 +7,7 @@ public partial class AnimatorHash
     public static readonly int ID_Falling = Animator.StringToHash("Falling");
     public static readonly int ID_Landing = Animator.StringToHash("Landing");
     public static readonly int ID_DodgeInGround = Animator.StringToHash("DodgeInGround");
+    public static readonly int ID_Death = Animator.StringToHash("Death");
     public static readonly int ID_AttackL = Animator.StringToHash("AttackL");
     public static readonly int ID_AttackDirectionL = Animator.StringToHash("AttackDirectionL");
     public static readonly int ID_AttackR = Animator.StringToHash("AttackR");

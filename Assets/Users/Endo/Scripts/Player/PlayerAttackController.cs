@@ -32,11 +32,12 @@ public sealed partial class PlayerAttackController : MonoBehaviour
                  .Where(other => !other.isTrigger)
                  .Subscribe(collider =>
                  {
-                     var damageable = collider.GetComponentInParent<IDamageable>();
+                     var target = collider.GetComponentInParent<EnemyBase>();
 
-                     if (damageable == null) return;
+                     if (target == null) return;
 
                      SoundManager.Instance.PlaySe(SoundDef.SwordAttack);
+                     EnemyManeger.Instance.Broker.Publish(OnAttackEnemy.GetEvent(target.GetInstanceID(), new AttackPower(10)));
                  })
                  .AddTo(this);
     }
@@ -67,8 +68,8 @@ public sealed partial class PlayerAttackController : MonoBehaviour
             Physics.OverlapSphereNonAlloc(transform.position, PlayerStatus.playerMasterData.AttackTargetFindRadius,
                                           inRangeEnemies, LayerConstants.Enemy);
 
-            Collider nearestEnemy = null;
-            float    minDistance  = Mathf.Infinity;
+            EnemyBase nearestEnemy = null;
+            float     minDistance  = Mathf.Infinity;
 
             // 最寄りの敵を取得
             // TODO: 張り付き中のオブジェクトを保持して参照させたい
@@ -81,24 +82,23 @@ public sealed partial class PlayerAttackController : MonoBehaviour
                 if (distanceFromSelf < minDistance)
                 {
                     minDistance  = distanceFromSelf;
-                    nearestEnemy = enemy;
+                    nearestEnemy = enemy.GetComponentInParent<EnemyBase>();
                 }
             }
 
             if (!nearestEnemy) return;
 
-            var damageable = nearestEnemy.GetComponent<IDamageable>();
-
-            if (damageable == null) return;
-
             // モーション再生
             switch (data.ActionInfo.actHand)
             {
                 case PlayerInputEvent.PlayerHand.Right:
-                    PlayerAnimationManager.Instance.RightHangingAttack((float)data.AttackDirection);
+                    PlayerAnimationManager.Instance.RightHangingAttack((float) data.AttackDirection);
+
                     break;
-                case  PlayerInputEvent.PlayerHand.Left:
-                    PlayerAnimationManager.Instance.LeftHangingAttack((float)data.AttackDirection);
+
+                case PlayerInputEvent.PlayerHand.Left:
+                    PlayerAnimationManager.Instance.LeftHangingAttack((float) data.AttackDirection);
+
                     break;
             }
             //PlayerMotionController.Instance.PlayAttackTriggerMotion(data.ActionInfo.actHand, data.AttackDirection);
@@ -110,7 +110,8 @@ public sealed partial class PlayerAttackController : MonoBehaviour
 
             // ダメージ付与
             // TODO: ダメージ量はマスターデータから引っ張ってくる
-            damageable.OnDamage(new AttackPower(10));
+            // damageable.OnDamage(new AttackPower(10));
+            EnemyManeger.Instance.Broker.Publish(OnAttackEnemy.GetEvent(nearestEnemy.GetInstanceID(), new AttackPower(10)));
         }
         // 通常攻撃
         else
@@ -119,10 +120,13 @@ public sealed partial class PlayerAttackController : MonoBehaviour
             switch (data.ActionInfo.actHand)
             {
                 case PlayerInputEvent.PlayerHand.Right:
-                    PlayerAnimationManager.Instance.AttackR((float)data.AttackDirection);
+                    PlayerAnimationManager.Instance.AttackR((float) data.AttackDirection);
+
                     break;
-                case  PlayerInputEvent.PlayerHand.Left:
-                    PlayerAnimationManager.Instance.AttackL((float)data.AttackDirection);
+
+                case PlayerInputEvent.PlayerHand.Left:
+                    PlayerAnimationManager.Instance.AttackL((float) data.AttackDirection);
+
                     break;
             }
             //PlayerMotionController.Instance.PlayAttackTriggerMotion(data.ActionInfo.actHand, data.AttackDirection);

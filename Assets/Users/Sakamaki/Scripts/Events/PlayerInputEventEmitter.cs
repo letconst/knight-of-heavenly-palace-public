@@ -10,7 +10,7 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
     // SwitchInputManagerのキャッシュ用変数
     private SwitchInputManager _switchInput;
 
-    // イベント通知送受信用
+    // イベント通知送受信用   
     private readonly MessageBroker _broker = new MessageBroker();
 
     // イベント通知送受信の公開用
@@ -44,6 +44,12 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
     /// </summary>
     private void InputHandler()
     {
+        // 死んでいたら操作を受け付けない
+        if(PlayerStateManager.HasFlag(PlayerStatus.PlayerState.Dead))
+        {
+            return;
+        }
+        
         // 左手の入力
         if (_switchInput.GetKeyDown(SwitchInputManager.JoyConButton.L))
         {
@@ -135,7 +141,6 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             {
                 OnZLZRInput(actionInfo);
             }
-
         }
         // Bの入力
         if (_switchInput.GetKeyDown(SwitchInputManager.JoyConButton.B))
@@ -154,8 +159,10 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             // 回避可能か (2022.07.01 デットゾーン対応)
             if (switchInputAbs > PlayerStatus.ControllerDeadZone.magnitude)
             {
+                SP requireStamina = RequireStaminaEmitter();
+                
                 // スタミナの減少値よりプレイヤーのスタミナがあったらイベント発行
-                if (PlayerStatus.playerSp > PlayerStatus.playerMasterData.NormalDodgeInfo.RequireStaminaPoint)
+                if (PlayerHealth.Instance.Sp.Value > requireStamina.Value)
                 {
                     // タイマーが0以下だった場合イベントの発行
                     if (_dodgeCheckTime <= 0.0f)
@@ -166,12 +173,12 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
                         {
                             // 壁に張り付いていたら剣をリセットするイベントを飛ばす
                             _broker.Publish(PlayerEvent.OnWallResetSword.GetEvent(null));
-                            _broker.Publish(PlayerEvent.Input.OnDodge.GetEvent());
+                            _broker.Publish(PlayerEvent.Input.OnDodge.GetEvent(requireStamina));
                         }
                         // 張り付いていない
                         else
                         {
-                            _broker.Publish(PlayerEvent.Input.OnDodge.GetEvent());
+                            _broker.Publish(PlayerEvent.Input.OnDodge.GetEvent(requireStamina));
                         }
 
                         // タイマーを起動する用のフラグをtrueにする
@@ -262,6 +269,38 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
         }
     }
 
+    /// <summary>
+    /// 状況に応じてスタミナの必要量を返す関数
+    /// </summary>
+    /// <returns> スタミナの必要量 </returns>
+    private SP RequireStaminaEmitter()
+    {
+        int requireStamina = 0;
+        float dodgeSpeed = 0;
+
+        // ぶら下がり状態
+        if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR) ||
+            PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL))
+        {
+            dodgeSpeed = PlayerStatus.playerMasterData.EscapingDodgeInfo.DodgeSpeed;
+            requireStamina = PlayerStatus.playerMasterData.EscapingDodgeInfo.RequireStaminaPoint;
+        }
+        // 着地
+        else if (PlayerGrounded.isGrounded)
+        {
+            dodgeSpeed = PlayerStatus.playerMasterData.NormalDodgeInfo.DodgeSpeed;
+            requireStamina = PlayerStatus.playerMasterData.NormalDodgeInfo.RequireStaminaPoint;
+        }
+        // 着地ではない
+        else if (!PlayerGrounded.isGrounded)
+        {
+            dodgeSpeed = PlayerStatus.playerMasterData.InAirDodgeInfo.DodgeSpeed;
+            requireStamina = PlayerStatus.playerMasterData.InAirDodgeInfo.RequireStaminaPoint;
+        }
+
+        return new SP(requireStamina);
+    }
+    
     /// <summary>
     /// 回避可能のタイマーの処理を記述する関数
     /// </summary>

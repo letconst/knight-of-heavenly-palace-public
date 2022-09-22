@@ -14,8 +14,8 @@ public class test : MonoBehaviour
    async void Start()
     {
         await UniTask.Yield();
-        ToResultSceneDataPack dataPack = new ToResultSceneDataPack(GameScene.Title, 1);
-        FadeContllor2.Instance.LoadScene(1, GameScene.MainGame, dataPack);
+        // ToResultSceneDataPack dataPack = new ToResultSceneDataPack(GameScene.Title, 1);
+        // FadeContllor2.Instance.LoadScene(1, GameScene.MainGame, dataPack);
     }
 
     // Update is called once per frame

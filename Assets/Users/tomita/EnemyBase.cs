@@ -41,7 +41,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual async void Awake()
     {
         //自身のInstanceID
-        _InstanceID = gameObject.GetInstanceID();
+        _InstanceID = GetInstanceID();
 
         Assert.IsFalse(masterId.Equals("-1"), "masterId is default value (-1)");
         Assert.IsNotNull(MasterDataManager.Instance, "MasterDataManager.Instance is null");

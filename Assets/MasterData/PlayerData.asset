@@ -23,21 +23,21 @@ MonoBehaviour:
   normalDodgeInfo:
     dodgeSpeed: 2
     requireMagicPower: 1
-    requireStaminaPoint: 5
+    requireStaminaPoint: 10
     acquireMagicPower: 0
-    invincibilityFrame: 0
+    invincibilityFrame: 4
     flinchFrame: 0
   inAirDodgeInfo:
     dodgeSpeed: 1
     requireMagicPower: 0
-    requireStaminaPoint: 0
+    requireStaminaPoint: 10
     acquireMagicPower: 0
-    invincibilityFrame: 0
+    invincibilityFrame: 2
     flinchFrame: 0
   escapingDodgeInfo:
-    dodgeSpeed: 0
+    dodgeSpeed: 2
     requireMagicPower: 0
-    requireStaminaPoint: 0
+    requireStaminaPoint: 10
     acquireMagicPower: 0
-    invincibilityFrame: 0
+    invincibilityFrame: 4
     flinchFrame: 0

@@ -67,4 +67,13 @@
 
         public const string FlinchFrameLabel = "回避後の硬直フレーム";
     }
+
+    public static class Mission
+    {
+        public const string MissionNameLabel = "依頼名";
+
+        public const string InitGeneratePrefabLabel = "初期生成するプレハブ";
+
+        public const string ContentImage = "選択時に表示する内容の画像";
+    }
 }

@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 1
   enemyName: "\u98DB\u9F8D"
   bodySize: 1
-  maxHitPoint: 40
+  maxHitPoint: 70
   baseAttackPower: 10

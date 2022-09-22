@@ -6,5 +6,6 @@
         Item,
         Player,
         Weapon,
+        Mission,
     }
 }

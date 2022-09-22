@@ -6,4 +6,5 @@ public enum GameScene
     MainGame,
     Result,
     Lobby,
+    Loading,
 }

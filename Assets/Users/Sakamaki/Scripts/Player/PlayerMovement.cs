@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
@@ -17,6 +18,8 @@ public partial class PlayerMovement : MonoBehaviour
 
     // プレイヤーの計算後速度(向きとか)
     private Vector3 _moveForward = Vector3.zero;
+
+    private bool _isDead;
 
     void Start()
     {
@@ -39,28 +42,46 @@ public partial class PlayerMovement : MonoBehaviour
 
         // 回避
         inputBroker.Receive<PlayerEvent.Input.OnDodge>()
-            .Subscribe(x =>
+            .Subscribe(async x =>
             {
                 float dodgeSpeed = 0f;
+                int reduceNum = 0;
 
+                if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR) ||
+                    PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL))
+                {
+                    dodgeSpeed = PlayerStatus.playerMasterData.NormalDodgeInfo.DodgeSpeed;
+                }
                 // 地上にいる場合の回避速度
-                if (PlayerGrounded.isGrounded)
+                else if (PlayerGrounded.isGrounded)
                 {
                     dodgeSpeed = PlayerStatus.playerMasterData.NormalDodgeInfo.DodgeSpeed;
                 }
                 // 空中にいる場合の回避速度
-                else
+                else if (!PlayerGrounded.isGrounded)
                 {
                     dodgeSpeed = PlayerStatus.playerMasterData.InAirDodgeInfo.DodgeSpeed;
                 }
 
-                Dodge(dodgeSpeed, rigidbody);
+                Dodge(dodgeSpeed, rigidbody, x.reduceStamina.Value);
 
                 // ステートチェンジイベントの発行
                 inputBroker.Publish(PlayerEvent.OnStateChangeRequest
                     .GetEvent(PlayerStatus.PlayerState.Dodge, PlayerStateChangeOptions.Add,
                         null,null));
+
+                await UniTask.Delay(1000);
+
+                inputBroker.Publish(PlayerEvent.OnStateChangeRequest
+                    .GetEvent(PlayerStatus.PlayerState.Dodge, PlayerStateChangeOptions.Delete,
+                        null,null));
             }).AddTo(this);
+
+        // 死亡イベントが飛ばされた時の死亡処理
+        inputBroker.Receive<OnStatusDestroy>()
+                   .Where(_ => !_isDead)
+                   .Subscribe(_ => Death())
+                   .AddTo(this);
     }
 
     void FixedUpdate()
@@ -68,12 +89,13 @@ public partial class PlayerMovement : MonoBehaviour
         // 毎フレーム初期化 (stoppingの判定をとるため)
         _moveForward = Vector3.zero;
 
-        // ぶら下がり・転移・UI操作状態のときは移動を受け付けない
+        // ぶら下がり・転移・UI操作・死んでいる状態のときは移動を受け付けない
         if (!PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL) &&
             !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR) &&
             !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.TransferringL) &&
             !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.TransferringR) &&
-            !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling))
+            !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling)　&&
+            !PlayerStateManager.HasFlag(PlayerStatus.PlayerState.Dead))
         {
             if (PlayerStatus.playerMasterData)
             {

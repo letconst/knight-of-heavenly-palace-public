@@ -32,6 +32,8 @@ namespace KOHP.MasterData
             public static readonly string PlayerDataPath = $"{BaseDataDir}/PlayerData.asset";
 
             public static readonly string WeaponDataDir = $"{BaseDataDir}/Weapon";
+
+            public static readonly string MissionDataDir = $"{BaseDataDir}/Mission";
         }
 
         public static class SideMenu
@@ -49,7 +51,6 @@ namespace KOHP.MasterData
 
         public static class Home
         {
-
             public static readonly int MaxHorizontalGrid = 5;
 
             public static readonly int MaxVerticalGrid = 2;
@@ -79,6 +80,11 @@ namespace KOHP.MasterData
                 {
                     dataType = DataType.Weapon,
                     label    = "武器",
+                },
+                new HomeGridButton
+                {
+                    dataType = DataType.Mission,
+                    label    = "依頼"
                 }
             };
         }

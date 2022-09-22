@@ -14,7 +14,8 @@ namespace KOHP.MasterData
             { RenderPage.Enemy, new EditorPage(EnemyGUI, OnToggledEnemy) },
             { RenderPage.Item, new EditorPage(ItemGUI, null) },
             { RenderPage.Player, new EditorPage(PlayerGUI, OnToggledPlayer) },
-            { RenderPage.Weapon, new EditorPage(WeaponGUI, null) }
+            { RenderPage.Weapon, new EditorPage(WeaponGUI, null) },
+            { RenderPage.Mission, new EditorPage(MissionGUI, OnToggledMission) }
         };
 
         private static readonly EditorPageManager _pageManager = new(_renderPageDict);

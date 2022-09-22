@@ -1,12 +1,12 @@
 public class SP
 {
-    public int Value { get;private set; }
-    public int MaxValue { get;private set; }
+    public float Value { get;private set; }
+    public float MaxValue { get;private set; }
 
     /// <summary>初期化</summary>
     /// <param name="initValue">SPの初期値</param>
     /// <param name="initMaxValue">SPの最大値</param>
-    public SP(int initValue,int initMaxValue = int.MaxValue)
+    public SP(float initValue,float initMaxValue = float.MaxValue)
     {
         Value = 0 <= initValue ? initValue : 0;
         MaxValue = initMaxValue;
@@ -50,7 +50,7 @@ public class SP
 
     /// <summary>正数のチェック</summary>
     /// <param name="_value"></param>
-    private bool CheckPositiveNumber(int _value)
+    private bool CheckPositiveNumber(float _value)
     {
         return 0 <= _value;
     }

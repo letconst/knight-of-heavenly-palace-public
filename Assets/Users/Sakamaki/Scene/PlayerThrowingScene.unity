@@ -500,6 +500,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cursorStatusR: 0
+  _CapsuleCastRadius: 1
+  _closeRangeDistance: 3
+  isAimAssist: 0
+  Player: {fileID: 0}
   _drawObjectR: {fileID: 1771396847}
   _drawObjectL: {fileID: 959038426}
   _drawSpritesR:
@@ -511,6 +515,10 @@ MonoBehaviour:
   _drawImageR: {fileID: 1771396849}
   _drawImageL: {fileID: 959038428}
   animationTime: 0.3
+  _playerLayerMask: 0
+  _defoultAndPlayerLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &417225581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7427,12 +7435,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f4bb8a3249fe325469d358605b642b41, type: 3}
---- !u!4 &1323354736 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7409488508653180759, guid: f4bb8a3249fe325469d358605b642b41,
-    type: 3}
-  m_PrefabInstance: {fileID: 1323354735}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1323354737 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3595644302377827259, guid: f4bb8a3249fe325469d358605b642b41,
@@ -7903,12 +7905,12 @@ PrefabInstance:
     - target: {fileID: 692419351577541303, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.000000015309297
+      value: 0.000000015309297
       objectReference: {fileID: 0}
     - target: {fileID: 692419351577541303, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 6.576464e-10
+      value: -6.576464e-10
       objectReference: {fileID: 0}
     - target: {fileID: 1822021647897639393, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
@@ -7938,12 +7940,12 @@ PrefabInstance:
     - target: {fileID: 1822021647897639393, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.0000000303366
+      value: 0.0000000303366
       objectReference: {fileID: 0}
     - target: {fileID: 1822021647897639393, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.0000000020251638
+      value: -0.0000000020251638
       objectReference: {fileID: 0}
     - target: {fileID: 2444896440280099979, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
@@ -8003,12 +8005,12 @@ PrefabInstance:
     - target: {fileID: 3571114105551232513, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.000000015315308
+      value: 0.000000015315308
       objectReference: {fileID: 0}
     - target: {fileID: 3571114105551232513, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 4.984018e-10
+      value: -4.984018e-10
       objectReference: {fileID: 0}
     - target: {fileID: 3571114105551232513, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
@@ -8088,12 +8090,12 @@ PrefabInstance:
     - target: {fileID: 7698961798816554705, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.000000015485204
+      value: 0.000000015485204
       objectReference: {fileID: 0}
     - target: {fileID: 7698961798816554705, guid: 835ca50dfb729d146b0d11fcb2788377,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.0000000013887418
+      value: -0.0000000013887418
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 835ca50dfb729d146b0d11fcb2788377, type: 3}
@@ -8242,12 +8244,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 486c74aa853c495439bc19734ee14083, type: 3}
---- !u!4 &1813835785 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5571038825336176766, guid: 486c74aa853c495439bc19734ee14083,
-    type: 3}
-  m_PrefabInstance: {fileID: 1813835784}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1813835786 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3323547165076902328, guid: 486c74aa853c495439bc19734ee14083,
@@ -9510,8 +9506,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   swingAccelThreshold: 3
-  attackInterval: 1
-  attackTargetFindRadius: 30
   attackCol: {fileID: 1513115440}
 --- !u!114 &2002850185
 MonoBehaviour:
@@ -9726,8 +9720,6 @@ MonoBehaviour:
   _swordParentL: {fileID: 2085728794}
   _swordObjR: {fileID: 1813835786}
   _swordObjL: {fileID: 1323354737}
-  _swordTipR: {fileID: 1813835785}
-  _swordTipL: {fileID: 1323354736}
   _flySwordParent: {fileID: 1538770589}
   _swordSpeed: 100
   _wallAngle: 250

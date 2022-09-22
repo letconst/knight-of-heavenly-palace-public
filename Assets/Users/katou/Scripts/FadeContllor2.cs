@@ -51,21 +51,27 @@ public class FadeContllor2 : SingletonMonoBehaviour<FadeContllor2>
 
         if (_canLoadScene)
         {
-            PreviousSceneData = sceneDataPack;
-            StartCoroutine(Fade(interval, gameScene.ToString()));
+            //LoadingópÉVÅ[ÉìÇì«Ç›çûÇﬁ
+            PreviousSceneData = new ToLoadingSceneDataPack(GameScene.Title,gameScene,sceneDataPack);
+            StartCoroutine(Fade(interval, GameScene.Loading.ToString()));
         }
     }
     private IEnumerator Fade(float interval, string taransition2)
     {
 
-        yield return FadeOut(interval);
+        yield return FadeOutAsync(interval);
 
-        yield return SceneManager.LoadSceneAsync(taransition2);
+        yield return LoadSceneAsync(taransition2);
         
-        yield return FadeIn(interval);  
+        yield return FadeInAsync(interval);  
 
     }
-    public IEnumerator FadeOut(float interval)
+
+    public AsyncOperation LoadSceneAsync(string Scenename)
+    {
+        return SceneManager.LoadSceneAsync(Scenename);
+    }
+    public IEnumerator FadeOutAsync(float interval)
     {
         _canLoadScene = false;
         float time = 0f;
@@ -80,7 +86,7 @@ public class FadeContllor2 : SingletonMonoBehaviour<FadeContllor2>
         }
     }
 
-    public IEnumerator FadeIn(float interval)
+    public IEnumerator FadeInAsync(float interval)
     {
         _canLoadScene = true;
         float time = 0f;
@@ -95,6 +101,17 @@ public class FadeContllor2 : SingletonMonoBehaviour<FadeContllor2>
         canvas.enabled = false;
         
     }
-    
-  
+
+    public void FadeOut(float interval)
+    {
+       StartCoroutine(FadeOutAsync(interval));
+          
+    }
+
+    public void FadeIn(float interval)
+    {
+        StartCoroutine(FadeInAsync(interval));
+    }
+
+
 }

@@ -36,8 +36,9 @@ public class MissionTimer : MonoBehaviour
     public void OnGoal()
     {
         goal = true;
-        ToResultSceneDataPack dataPack = new ToResultSceneDataPack(GameScene.MainGame, time);
-        FadeContllor2.Instance.LoadScene(1, GameScene.Result, dataPack);
+        var dataPack = (ToMainGameSceneDataPack) FadeContllor2.PreviousSceneData;
+        ToResultSceneDataPack nextDataPack = new ToResultSceneDataPack(GameScene.MainGame, time, dataPack.MissionData);
+        FadeContllor2.Instance.LoadScene(1, GameScene.Result, nextDataPack);
     }
 
     public void riset()

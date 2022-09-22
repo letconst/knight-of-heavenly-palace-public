@@ -1,3 +1,4 @@
+using UniRx;
 using UnityEngine;
 
 /// <summary>
@@ -82,8 +83,9 @@ public static class PlayerEvent
         /// <summary>
         /// 回避入力をした際のメッセージ
         /// </summary>
-        public sealed class OnDodge : EventMessage<OnDodge>
+        public sealed class OnDodge : EventMessage<OnDodge, SP>
         {
+            public SP reduceStamina => param1;
         }
     }
 
@@ -112,28 +114,9 @@ public static class PlayerEvent
         public PlayerStatus.PlayerState State => param1;
     }
 
-    public sealed class OnBeginThrowSword : EventMessage<OnBeginThrowSword, PlayerInputEvent.PlayerHand, RaycastHit, Transform,
-        float>
+    public sealed class OnBeginThrowSword : EventMessage<OnBeginThrowSword, WeaponThrowParams>
     {
-        /// <summary>
-        /// 投げた手
-        /// </summary>
-        public PlayerInputEvent.PlayerHand Hand => param1;
-
-        /// <summary>
-        /// カーソル先にあったオブジェクトへのヒット情報
-        /// </summary>
-        public RaycastHit Hit => param2;
-
-        /// <summary>
-        /// 親オブジェクト
-        /// </summary>
-        public Transform Parent => param3;
-
-        /// <summary>
-        /// 投擲速度
-        /// </summary>
-        public float Speed => param4;
+        public WeaponThrowParams Params => param1;
     }
 
     /// <summary>
@@ -157,6 +140,22 @@ public static class PlayerEvent
         public PlayerActionInfo ActionInfo => param3;
     }
 
+    /// <summary>
+    /// 剣の位置情報を習得するイベントメッセージ
+    /// </summary>
+    public sealed class GetSwordPosition : EventMessage<GetSwordPosition, PlayerActionInfo, Subject<GetSwordPositionParams>>
+    {
+        /// <summary>
+        /// 右手か左手か
+        /// </summary>
+        public PlayerActionInfo ActionInfo => param1;
+
+        /// <summary>
+        /// 帰ってきた剣の位置情報
+        /// </summary>
+        public Subject<GetSwordPositionParams> Response => param2;
+    }
+    
     /// <summary>
     /// 武器が着弾している時に剣を手物に戻すメッセージ
     /// </summary>
@@ -212,5 +211,29 @@ public static class PlayerEvent
     /// </summary>
     public sealed class OnFalling : EventMessage<OnFalling>
     {
+    }
+
+    /// <summary>
+    /// 剣を飛ばした後にあたったオブジェクトに親子関係を変更するメッセージ
+    /// </summary>
+    public sealed class OnParentChangeToObject : EventMessage<OnParentChangeToObject, Transform, Transform, PlayerActionInfo>
+    {
+        // あたった先のトランスフォーム
+        public Transform HitObject => param1;
+        // 剣のオブジェクト情報
+        public Transform SwordObject => param2;
+        // 右手か左手かの情報
+        public PlayerActionInfo ActionInfo => param3;
+    }
+
+    /// <summary>
+    /// スタミナを消費する際のメッセージ
+    /// </summary>
+    public sealed class ReduceStamina : EventMessage<ReduceStamina, float>
+    {
+        /// <summary>
+        /// 減らすスタミナ値
+        /// </summary>
+        public float ReduceNum => param1;
     }
 }

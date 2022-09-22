@@ -1,18 +1,23 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewMissionData", menuName = "マスターデータ/依頼")]
-public class MasterMission : MasterDataBaseWithId
+public sealed class MasterMission : MasterDataBaseWithId
 {
-    [SerializeField]
-    private MissionData[] missionDatas;
+    [SerializeField, Header(MasterDataModelConstants.Mission.MissionNameLabel)]
+    private string missionName;
 
-    /// <summary>ミッションデータ</summary>
-    public IReadOnlyList<MissionData> MissionDatas => missionDatas;
+    /// <summary>ミッション名</summary>
+    public string MissionName => missionName;
 
-    [System.Serializable]
-    public sealed class MissionData
-    {
-        public string missionName;
-    }
+    [SerializeField, Header(MasterDataModelConstants.Mission.InitGeneratePrefabLabel)]
+    private GameObject initGeneratePrefab;
+
+    /// <summary>初期生成するプレハブ</summary>
+    public GameObject InitGeneratePrefab => initGeneratePrefab;
+
+    [SerializeField, Header(MasterDataModelConstants.Mission.ContentImage)]
+    private Sprite contentImage;
+
+    /// <summary>選択時に表示する内容の画像</summary>
+    public Sprite ContentImage => contentImage;
 }

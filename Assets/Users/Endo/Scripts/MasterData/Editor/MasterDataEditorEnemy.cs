@@ -6,7 +6,7 @@ namespace KOHP.MasterData
     public sealed partial class MasterDataEditor
     {
         private static Editor           _enemyEditor;
-        private static ScriptableObject _target;
+        private static ScriptableObject _enemyTarget;
         private static MasterEnemy[]    _enemyData;
 
         /// <summary>
@@ -26,16 +26,16 @@ namespace KOHP.MasterData
 
                     if (GUILayout.Button($"{data.Name} ({data.Id})", GUIStyles.EnemyListButtonStyle))
                     {
-                        _target = data;
+                        _enemyTarget = data;
                     }
                 }
             }
 
             void RightContent()
             {
-                if (!_target) return;
+                if (!_enemyTarget) return;
 
-                _enemyEditor = Editor.CreateEditor(_target);
+                _enemyEditor = Editor.CreateEditor(_enemyTarget);
 
                 _enemyEditor.OnInspectorGUI();
             }

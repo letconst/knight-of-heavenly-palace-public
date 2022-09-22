@@ -260,6 +260,7 @@ GameObject:
   - component: {fileID: 4228207002407624961}
   - component: {fileID: 843955226703101719}
   - component: {fileID: 4954569397234951406}
+  - component: {fileID: 4519119887411366662}
   m_Layer: 7
   m_Name: Mgic_Sword_left
   m_TagString: Untagged
@@ -302,7 +303,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &4954569397234951406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -316,7 +317,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tip: {fileID: 5630378218662923251}
+  _parentConstraint: {fileID: 4519119887411366662}
   hand: 0
+--- !u!1773428102 &4519119887411366662
+ParentConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3595644302377827259}
+  m_Enabled: 1
+  m_Weight: 1
+  m_TranslationAtRest: {x: -0.087, y: 0.103, z: 0.04}
+  m_RotationAtRest: {x: 2.068, y: -1.45, z: -98.099}
+  m_TranslationOffsets: []
+  m_RotationOffsets: []
+  m_AffectTranslationX: 1
+  m_AffectTranslationY: 1
+  m_AffectTranslationZ: 1
+  m_AffectRotationX: 0
+  m_AffectRotationY: 0
+  m_AffectRotationZ: 0
+  m_IsContraintActive: 1
+  m_IsLocked: 1
+  m_Sources: []
 --- !u!1 &8209739267912667567
 GameObject:
   m_ObjectHideFlags: 0
@@ -410,6 +434,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7409488508653180759}
   - component: {fileID: 5630378218662923251}
+  - component: {fileID: 7804982891378129903}
   m_Layer: 7
   m_Name: TipObject
   m_TagString: Untagged
@@ -445,3 +470,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.01, y: 0.01, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!54 &7804982891378129903
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8424165803740140755}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0

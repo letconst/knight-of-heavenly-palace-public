@@ -3,6 +3,7 @@ using UnityEngine;
 // UI関係の描写を行うクラス
 public class UIDraw : MonoBehaviour
 {
+    [SerializeField] private EnemyCount _enemyCount;
     [SerializeField] private CursorDraw _cursorDraw;
 #if UNITY_EDITOR
     [SerializeField] private StateChecker _stateChecker; // ステートチェッカー
@@ -15,6 +16,7 @@ public class UIDraw : MonoBehaviour
     private void Start()
     {
         _cursorDraw = GetComponent<CursorDraw>();
+        _enemyCount = GetComponent<EnemyCount>();
     }
 
     void Update()

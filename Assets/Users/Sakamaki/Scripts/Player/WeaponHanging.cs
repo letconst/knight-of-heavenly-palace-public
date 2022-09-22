@@ -43,12 +43,6 @@ public partial class WeaponThrowing
                 break;
         }
 
-
-        // まず斜面をどう求めていくかを考える必要がありそう
-        // まず、斜面がぶら下がり状態の斜面条件を満たしているか
-        // if(斜面が足りているか) return;
-        // 足りていたら処理を行う
-
         // hitしたオブジェクトの座標をプレイヤー座標に代入
         _playerObject.transform.position = rayHitPoint + _compensationPostion;
 
@@ -68,6 +62,11 @@ public partial class WeaponThrowing
         {
             _leftWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Left);
+            // ParentConstraintも合わせて初期化 
+            _broker.Publish(PlayerEvent.OnParentChangeToObject.GetEvent(null, null, new PlayerActionInfo()
+            {
+                actHand = PlayerInputEvent.PlayerHand.Left
+            }));
             _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL,
                 PlayerStateChangeOptions.Delete, null, null));
         }
@@ -75,6 +74,11 @@ public partial class WeaponThrowing
         {
             _rightWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Right);
+            // ParentConstraintも合わせて初期化
+            _broker.Publish(PlayerEvent.OnParentChangeToObject.GetEvent(null, null, new PlayerActionInfo()
+            {
+                actHand = PlayerInputEvent.PlayerHand.Right
+            }));
             _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR,
                 PlayerStateChangeOptions.Delete, null, null));
         }
@@ -95,6 +99,11 @@ public partial class WeaponThrowing
         {
             _leftWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Left);
+            // ParentConstraintも合わせて初期化
+            _broker.Publish(PlayerEvent.OnParentChangeToObject.GetEvent(null, null, new PlayerActionInfo()
+            {
+                actHand = PlayerInputEvent.PlayerHand.Left
+            }));
             _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL,
                 PlayerStateChangeOptions.Delete, null, null));
         }
@@ -102,6 +111,11 @@ public partial class WeaponThrowing
         {
             _rightWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Right);
+            // ParentConstraintも合わせて初期化
+            _broker.Publish(PlayerEvent.OnParentChangeToObject.GetEvent(null, null, new PlayerActionInfo()
+            {
+                actHand = PlayerInputEvent.PlayerHand.Right
+            }));
             _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR,
                 PlayerStateChangeOptions.Delete, null, null));
         }

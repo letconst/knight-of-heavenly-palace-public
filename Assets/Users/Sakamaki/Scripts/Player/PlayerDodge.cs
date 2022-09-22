@@ -10,12 +10,19 @@ public partial class PlayerMovement
     /// </summary>
     /// <param name="dashSpeed"> 緊急回避する速度 </param>>
     /// <param name="moveObject"> 緊急回避するオブジェクト </param>>
-    /// <param name="requestSp"> 緊急回避に使うスタミナ減少値 </param>>
-    private void Dodge(float dashSpeed, Rigidbody moveObject)
+    /// <param name="staminaReduceNum">　緊急回避に使うスタミナ減少値　</param>
+    private void Dodge(float dashSpeed, Rigidbody moveObject, float staminaReduceNum)
     {
         // 消費スタミナ分スタミナを減らす
-        /*PlayerStatus.playerSp -= staminaReduceNum;*/
-
+        PlayerInputEventEmitter.Instance.Broker.
+            Publish(PlayerEvent.ReduceStamina.GetEvent(staminaReduceNum));
+        
+        /*
+        Debug.Log("消費スタミナ：" + staminaReduceNum);
+        Debug.Log("最大値スタミナ：" + PlayerHealth.Instance.Sp.MaxValue);
+        Debug.Log("現在のスタミナ：" + PlayerHealth.Instance.Sp.Value);
+        */
+        
         // 回避用のvector3変数を用意
         Vector3 dodgeVelocity = _moveForward * dashSpeed;
 

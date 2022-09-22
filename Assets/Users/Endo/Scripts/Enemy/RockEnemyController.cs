@@ -2,10 +2,11 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public sealed class RockEnemyController : MonoBehaviour, IDamageable
+public sealed class RockEnemyController : EnemyBase
 {
     [SerializeField]
     private MeshRenderer[] fractured;
@@ -16,18 +17,21 @@ public sealed class RockEnemyController : MonoBehaviour, IDamageable
     [SerializeField, Header("フェードアウト時間 (秒)")]
     private float fadeOutTime;
 
+    [SerializeField]
+    private Collider tutorialRangeCollider;
+
     private MeshFilter   _selfMeshFilter;
     private MeshRenderer _selfRenderer;
     private Collider     _selfCollider;
 
-    private readonly MessageBroker _broker = new();
+    private bool _isDead;
 
     private CancellationToken _destroyCancellationToken;
 
-    public HP Hp { get; private set; }
-
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
+
         _selfMeshFilter = GetComponent<MeshFilter>();
         _selfRenderer   = GetComponent<MeshRenderer>();
         _selfCollider   = GetComponent<Collider>();
@@ -39,21 +43,34 @@ public sealed class RockEnemyController : MonoBehaviour, IDamageable
             shard.gameObject.SetActive(false);
         }
 
-        Hp = new HP(1, 1, _broker);
+        tutorialRangeCollider.OnTriggerEnterAsObservable()
+                             .Subscribe(other =>
+                             {
+                                 if (other.isTrigger)
+                                     return;
 
-        _broker.Receive<OnStatusDestroy>()
-               .Subscribe(_ => OnDead())
-               .AddTo(this);
+                                 if (1 << other.gameObject.layer == LayerConstants.Player)
+                                 {
+                                     PlayerInputEventEmitter.Instance.Broker.Publish(
+                                         MainGameEvent.Tutorial.OnTask4Passed.GetEvent());
+                                 }
+                             })
+                             .AddTo(this);
     }
 
-    public void OnDamage(AttackPower attackPower)
+    public override void Attack()
     {
-        Hp.Damage(attackPower);
-        RockMissionManager.Instance.CountUp();
+        // 攻撃なし
     }
 
-    private async void OnDead()
+    protected override async void OnDead()
     {
+        if (_isDead) return;
+
+        _isDead = true;
+
+        MainGameMissionManager.Instance.CountUp();
+
         Destroy(_selfMeshFilter);
         Destroy(_selfRenderer);
         _selfCollider.enabled = false;

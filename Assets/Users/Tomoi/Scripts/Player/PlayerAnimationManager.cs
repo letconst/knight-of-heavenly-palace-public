@@ -44,7 +44,7 @@ public class PlayerAnimationManager : SingletonMonoBehaviour<PlayerAnimationMana
                     //Instance.PlayTriggerMotion(PlayerMotionController.MotionType.Landing);
                     EffectManager.Instance.EffectPlay(EffectType.DustParticle, transform.position, Quaternion.identity);
                 }
-                
+
                 FallingFalse();
                 //Instance.SetBool(PlayerMotionController.MotionType.Falling, false);
             })
@@ -75,6 +75,14 @@ public class PlayerAnimationManager : SingletonMonoBehaviour<PlayerAnimationMana
     public void DodgeInGround()
     {
         _animator.SetTrigger(AnimatorHash.ID_DodgeInGround);
+    }
+
+    /// <summary>
+    /// 死亡アニメーションを再生する
+    /// </summary>
+    public void Death()
+    {
+        _animator.SetTrigger(AnimatorHash.ID_Death);
     }
 
     #region Falling
@@ -272,7 +280,7 @@ public class PlayerAnimationManager : SingletonMonoBehaviour<PlayerAnimationMana
                 break;
         }
     }
-    
+
     #endregion
 
     #region ぶら下がりのアニメーション

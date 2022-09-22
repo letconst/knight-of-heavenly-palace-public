@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
@@ -12,8 +13,6 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
     [SerializeField] private Transform _swordParentL;
     [SerializeField] private GameObject _swordObjR;
     [SerializeField] private GameObject _swordObjL;
-    [SerializeField] private Transform _swordTipR;
-    [SerializeField] private Transform _swordTipL;
 
     [SerializeField, Header("飛ばした後の剣の親オブジェクト")]
     private GameObject _flySwordParent;
@@ -28,9 +27,13 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
 
     private Camera _mainCamera;
 
+    private Vector3 _swordHitPosition = Vector3.zero;
+
     // イベント発行用のbroker
     private IMessageBroker _broker;
     private Rigidbody _playerRb;
+
+    private Subject<GetSwordPositionParams> _subject = new Subject<GetSwordPositionParams>();
 
     private void Start()
     {
@@ -46,10 +49,29 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
         _broker.Receive<PlayerEvent.OnLandingSword>()
                .Subscribe(OnLandingSword)
                .AddTo(this);
+
+        _subject.Subscribe(x =>
+        {
+            Vector3 teleportDiff = _swordHitPosition - x.swordPosition;
+
+            _playerObject.transform.position -= teleportDiff;
+
+            EffectType targetEffectOut = x.actionInfo.actHand switch
+            {
+                PlayerInputEvent.PlayerHand.Left  => EffectType.SwordTransfer_Out_Left,
+                PlayerInputEvent.PlayerHand.Right => EffectType.SwordTransfer_Out_Right
+            };
+
+            EffectManager.Instance.EffectPlay(targetEffectOut, _playerObject.transform.position, Quaternion.identity);
+        }).AddTo(this);
     }
 
     private async void OnLandingSword(PlayerEvent.OnLandingSword data)
     {
+
+        // 剣の着地地点の代入
+        _swordHitPosition = data.LandingPosition;
+
         PlayerStatus.PlayerState targetState = data.ActionInfo.actHand switch
         {
             PlayerInputEvent.PlayerHand.Left  => PlayerStatus.PlayerState.TransferringL,
@@ -59,22 +81,21 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
         // 転移状態に設定
         _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(targetState, PlayerStateChangeOptions.Add, null, null));
 
-        EffectType targetEffectIn = data.ActionInfo.actHand switch
-        {
-            PlayerInputEvent.PlayerHand.Left  => EffectType.SwordTransfer_In_Left,
-            PlayerInputEvent.PlayerHand.Right => EffectType.SwordTransfer_In_Right
-        };
-
         EffectType targetEffectOut = data.ActionInfo.actHand switch
         {
             PlayerInputEvent.PlayerHand.Left  => EffectType.SwordTransfer_Out_Left,
             PlayerInputEvent.PlayerHand.Right => EffectType.SwordTransfer_Out_Right
         };
 
+        EffectType targetEffectIn = data.ActionInfo.actHand switch
+        {
+            PlayerInputEvent.PlayerHand.Left  => EffectType.SwordTransfer_In_Left,
+            PlayerInputEvent.PlayerHand.Right => EffectType.SwordTransfer_In_Right
+        };
+
         EffectManager.Instance.EffectPlay(targetEffectIn, _playerObject.transform.position, Quaternion.identity, async () =>
         {
-            EffectManager.Instance.EffectPlay(targetEffectOut, data.LandingPosition, Quaternion.identity);
-
+            // ぶら下がりの角度を見て条件を満たしてたらぶら下がり
             if (data.LandingAngle < _wallAngle)
             {
                 WeaponHanging(data.LandingPosition, data.ActionInfo);
@@ -84,16 +105,34 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
                 // hitしたオブジェクトの座標をプレイヤー座標に代入
                 _playerObject.transform.position = data.LandingPosition;
 
+                // エフェクトの再生
+                EffectManager.Instance.EffectPlay(targetEffectOut, _playerObject.transform.position, Quaternion.identity);
+
+                // 剣着弾時にOnParentToObjectのリセット
+                _broker.Publish(PlayerEvent.OnParentChangeToObject.GetEvent(null, null, new PlayerActionInfo()
+                {
+                    actHand = data.ActionInfo.actHand
+                }));
+
                 // ポジションのリセット
                 SwordPositionReset(data.ActionInfo.actHand);
+            }
+
+
+            // ぶら下がりだった場合ここで値の修正と代入を行う
+            if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL) ||
+                PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR))
+            {
+                _broker.Publish(PlayerEvent.GetSwordPosition.GetEvent(data.ActionInfo, _subject));
             }
 
             // 転移終了エフェクトを少し待ってからプレイヤーアクティブ化
             // TODO: delayは避けたい
             await UniTask.Delay(500);
 
-            _playerObject.SetActive(true);
             _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(targetState, PlayerStateChangeOptions.Delete, null, null));
+
+            _playerObject.SetActive(true);
         });
 
         switch (data.ActionInfo.actHand)
@@ -182,9 +221,6 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
         {
             // 剣を飛ばしたらプレイヤーの座標に追従しない様にparentを移す
             swordObj.parent = _flySwordParent.transform;
-            // 向きに合わせて回転処理を行う
-            swordObj.rotation = Quaternion.FromToRotation(swordObj.up, ray.direction)
-                                * swordObj.rotation;
 
             // 再生するエフェクト選択
             EffectType trailEffectType = actionInfo.actHand switch
@@ -201,15 +237,29 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
             EffectManager.Instance.EffectPlay(trailEffectType, Vector3.zero, Quaternion.identity,
                 swordObj, true, totalThrowingTime);
 
-            _broker.Publish(
-                PlayerEvent.OnBeginThrowSword.GetEvent(actionInfo.actHand, hit, _flySwordParent.transform, _swordSpeed));
+            Transform homingTarget = null;
+
+            // 当たったのが魔物ならホーミング対象に
+            if (1 << hit.transform.gameObject.layer == LayerConstants.Enemy)
+            {
+                homingTarget = hit.transform;
+
+                if (actionInfo.actHand == PlayerInputEvent.PlayerHand.Left)
+                {
+                    _broker.Publish(MainGameEvent.Tutorial.OnTask5Passed.GetEvent());
+                }
+            }
+
+            var parameters = new WeaponThrowParams(actionInfo.actHand, hit, _flySwordParent.transform, homingTarget, _swordSpeed);
+
+            _broker.Publish(PlayerEvent.OnBeginThrowSword.GetEvent(parameters));
         }
     }
 
     /// <summary>
     /// 見た目上の剣の場所を戻す関数
     /// </summary>
-    private void SwordPositionReset(PlayerInputEvent.PlayerHand actionInfo)
+    public void SwordPositionReset(PlayerInputEvent.PlayerHand actionInfo)
     {
         if (actionInfo == PlayerInputEvent.PlayerHand.Right)
         {

@@ -4,10 +4,10 @@
 public static class LobbyEvent
 {
     /// <summary>依頼を選択した際のイベント</summary>
-    public sealed class OnMissionSelected : EventMessage<OnMissionSelected, Mission>
+    public sealed class OnMissionSelected : EventMessage<OnMissionSelected, MasterMission>
     {
         /// <summary>選択した依頼情報</summary>
-        public Mission SelectedMission => param1;
+        public MasterMission SelectedMission => param1;
     }
 
     /// <summary>依頼選択をキャンセルした際のイベント</summary>

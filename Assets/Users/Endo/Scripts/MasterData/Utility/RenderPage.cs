@@ -8,6 +8,7 @@ namespace KOHP.MasterData
         Item,
         Player,
         Weapon,
+        Mission,
     }
 }
 #endif

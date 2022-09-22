@@ -94,6 +94,7 @@ public static class PlayerStatus
         Falling = 1L << 7,
         TransferringR = 1L << 8,
         TransferringL = 1L << 9,
+        Dead = 1L << 10,
         // 共通アクション (11 ~ 20)
         SwordPulling = 1L << 11,
         SwordDelivery = 1L << 12,

@@ -13,15 +13,15 @@ public partial class PlayerAttackController
 
         attackCol.OnTriggerEnterAsObservable()
                  .Where(other => !other.isTrigger)
-                 .Where(other => other.GetComponent<IDamageable>() != null)
+                 .Where(other => other.GetComponentInParent<EnemyBase>() != null)
                  .Subscribe(OnHit)
                  .AddTo(this);
     }
 
     private void OnHit(Collider other)
     {
-        var damageable = other.GetComponent<IDamageable>();
+        var target = other.GetComponentInParent<EnemyBase>();
 
-        damageable.OnDamage(new AttackPower(1));
+        EnemyManeger.Instance.Broker.Publish(OnAttackEnemy.GetEvent(target.GetInstanceID(), new AttackPower(10)));
     }
 }

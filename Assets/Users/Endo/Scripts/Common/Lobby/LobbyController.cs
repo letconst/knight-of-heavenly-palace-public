@@ -51,6 +51,9 @@ public sealed class LobbyController : SingletonMonoBehaviour<LobbyController>
                .AddTo(this);
     }
 
+    /// <summary>
+    /// Bボタン押下時の処理
+    /// </summary>
     private void OnBPressed()
     {
         stateManager.RemoveState(LobbyStateManager.LobbyState.MissionBoardOpened);
@@ -63,9 +66,16 @@ public sealed class LobbyController : SingletonMonoBehaviour<LobbyController>
         missionBoardView.BoardCanvasGroup.ToggleFade(false, .5f).Forget();
     }
 
+    /// <summary>
+    /// 依頼が選択されたときの処理
+    /// </summary>
+    /// <param name="data"></param>
     private async void OnMissionSelected(LobbyEvent.OnMissionSelected data)
     {
         CancellationTokenSource cts = new();
+
+        // 表示内容設定
+        missionBoardView.ContentImage.sprite = data.SelectedMission.ContentImage;
 
         await missionBoardView.ConfirmCanvasGroup.ToggleFade(true, confirmViewFadeDuration);
 
