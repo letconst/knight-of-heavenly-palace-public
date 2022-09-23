@@ -93,6 +93,13 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
             PlayerInputEvent.PlayerHand.Right => EffectType.SwordTransfer_In_Right
         };
 
+        if (data.LandingAngle < _wallAngle)
+        {
+            // ぶら下がり状態なので重力と移動を禁止する
+            _playerRb.constraints = RigidbodyConstraints.FreezeAll;
+            _playerRb.isKinematic = true;
+        }
+
         EffectManager.Instance.EffectPlay(targetEffectIn, _playerObject.transform.position, Quaternion.identity, async () =>
         {
             // ぶら下がりの角度を見て条件を満たしてたらぶら下がり
@@ -244,10 +251,8 @@ public partial class WeaponThrowing : SingletonMonoBehaviour<WeaponThrowing>
             {
                 homingTarget = hit.transform;
 
-                if (actionInfo.actHand == PlayerInputEvent.PlayerHand.Left)
-                {
-                    _broker.Publish(MainGameEvent.Tutorial.OnTask5Passed.GetEvent());
-                }
+                // チュートリアルタスク5の達成通知
+                _broker.Publish(MainGameEvent.Tutorial.OnTask5Passed.GetEvent());
             }
 
             var parameters = new WeaponThrowParams(actionInfo.actHand, hit, _flySwordParent.transform, homingTarget, _swordSpeed);

@@ -10,13 +10,16 @@ public class LoadingController : MonoBehaviour
     {
         yield return null;
 
+        // 開放処理実行
+        yield return Release();
+
         var DataPack = (ToLoadingSceneDataPack)FadeContllor2.PreviousSceneData;
         AsyncOperation operation = FadeContllor2.Instance.LoadSceneAsync(DataPack.NextScene.ToString());
 
         // 読み込み優先に
         Application.backgroundLoadingPriority = ThreadPriority.High;
 #if UNITY_SWITCH && !UNITY_EDITOR
-        UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.FastLoad);
+        // UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.FastLoad);
 #endif
 
         float StartTime = Time.time;
@@ -30,7 +33,7 @@ public class LoadingController : MonoBehaviour
         // 優先解除
         Application.backgroundLoadingPriority = ThreadPriority.Normal;
 #if UNITY_SWITCH && !UNITY_EDITOR
-        UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.Normal);
+        // UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.Normal);
 #endif
 
         float EndTime =Time.time;
@@ -48,6 +51,9 @@ public class LoadingController : MonoBehaviour
 
     }
 
-    // Update is called once per frame
-
+    private IEnumerator Release()
+    {
+        System.GC.Collect();
+        yield return Resources.UnloadUnusedAssets();
+    }
 }

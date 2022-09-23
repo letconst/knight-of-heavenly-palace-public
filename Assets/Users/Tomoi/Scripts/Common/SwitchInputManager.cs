@@ -112,7 +112,8 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
     /// <returns></returns>
     private NpadButton TransrationJoyConButtonToNpadButton(JoyConButton _joyConButton)
     {
-        return (NpadButton)Enum.Parse(typeof(NpadButton), _joyConButton.ToString());
+        return (NpadButton) _joyConButton;
+        // return (NpadButton)Enum.Parse(typeof(NpadButton), _joyConButton.ToString());
     }
 
     /// <summary>
@@ -136,8 +137,8 @@ public class SwitchInputManager : SingletonMonoBehaviour<SwitchInputManager>
                 return Vector2.zero;
         }
 
-        axis.x = (float)_state.x / (float)AnalogStickState.Max;
-        axis.y = (float)_state.y / (float)AnalogStickState.Max;
+        axis.x = 1f * _state.x / AnalogStickState.Max;
+        axis.y = 1f * _state.y / AnalogStickState.Max;
         return axis;
     }
 

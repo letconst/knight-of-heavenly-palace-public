@@ -1,4 +1,3 @@
-using System;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
@@ -11,8 +10,8 @@ public partial class PlayerMovement : MonoBehaviour
     // 移動関係
     [SerializeField, Header("移動させるオブジェクト")]
     private GameObject _playerObject;
-    [SerializeField, Header("正面設定を行うカメラオブジェクト")]
-    private GameObject _cameraObject;
+
+    private Transform _cameraObject;
 
     private Rigidbody rigidbody;
 
@@ -23,6 +22,7 @@ public partial class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        _cameraObject = Camera.main.transform;
         rigidbody = _playerObject.GetComponent<Rigidbody>();
 
         IMessageBroker inputBroker = PlayerInputEventEmitter.Instance.Broker;

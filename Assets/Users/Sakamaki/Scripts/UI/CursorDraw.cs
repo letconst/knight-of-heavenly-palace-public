@@ -111,13 +111,16 @@ public class CursorDraw : MonoBehaviour
                 }
                 else
                 {
-                    var v3 = _camera.WorldToScreenPoint(hitR.point);
+                    var v3 = _camera.WorldToScreenPoint(hitR.collider.bounds.center);
                     //v3の座標が画面内ならそのまま表示する。そうでなければ元のカーソルの座標で表示する
                     if (InScreenVector3(v3))
                     {
-                        _cursorObjR.position = _camera.WorldToScreenPoint(hitR.point);
+                        _cursorObjR.position = v3;
                     }
-                    _cursorObjR.position = JoyConToScreenPointer.Instance.RightJoyConScreenVector2;
+                    else
+                    {
+                        _cursorObjR.position = JoyConToScreenPointer.Instance.RightJoyConScreenVector2;
+                    }
                 }
             }
             else
@@ -139,13 +142,16 @@ public class CursorDraw : MonoBehaviour
                 }
                 else
                 {
-                    var v3 = _camera.WorldToScreenPoint(hitL.point);
+                    var v3 = _camera.WorldToScreenPoint(hitL.collider.bounds.center);
                     //v3の座標が画面内ならそのまま表示する。そうでなければ元のカーソルの座標で表示する
                     if (InScreenVector3(v3))
                     {
                         _cursorObjL.position = v3;
                     }
-                    _cursorObjL.position = JoyConToScreenPointer.Instance.LeftJoyConScreenVector2;
+                    else
+                    {
+                        _cursorObjL.position = JoyConToScreenPointer.Instance.LeftJoyConScreenVector2;
+                    }
                 }
             }
             else

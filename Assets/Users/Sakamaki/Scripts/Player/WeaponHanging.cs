@@ -27,6 +27,10 @@ public partial class WeaponThrowing
                 else
                     _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL,
                         PlayerStateChangeOptions.Add, null, null));
+
+                // PlayerAnimationManager.Instance.LeftHandClose();
+                // PlayerAnimationManager.Instance.LeftHandHangingFalse();
+
                 break;
             case PlayerInputEvent.PlayerHand.Right:
                 if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL))
@@ -38,6 +42,10 @@ public partial class WeaponThrowing
                 else
                     _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR,
                         PlayerStateChangeOptions.Add, null, null));
+
+                // PlayerAnimationManager.Instance.RightHandClose();
+                // PlayerAnimationManager.Instance.RightHandHangingFalse();
+
                 break;
             default:
                 break;
@@ -45,9 +53,6 @@ public partial class WeaponThrowing
 
         // hitしたオブジェクトの座標をプレイヤー座標に代入
         _playerObject.transform.position = rayHitPoint + _compensationPostion;
-
-        // ぶら下がり状態なので重力と移動を禁止する
-        _playerRb.isKinematic = true;
     }
 
     /// <summary>
@@ -56,19 +61,22 @@ public partial class WeaponThrowing
     public void ResetSword()
     {
         _playerRb.isKinematic = false;
+        _playerRb.constraints = RigidbodyConstraints.FreezeRotation;
 
         // つかみ状態でステートがついているのでステートを見てリセット処理
         if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingL))
         {
             _leftWeapon.IsThrowing = false;
             SwordPositionReset(PlayerInputEvent.PlayerHand.Left);
-            // ParentConstraintも合わせて初期化 
+            // ParentConstraintも合わせて初期化
             _broker.Publish(PlayerEvent.OnParentChangeToObject.GetEvent(null, null, new PlayerActionInfo()
             {
                 actHand = PlayerInputEvent.PlayerHand.Left
             }));
             _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingL,
                 PlayerStateChangeOptions.Delete, null, null));
+
+            // PlayerAnimationManager.Instance.LeftHandHangingTrue();
         }
         else if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.HangingR))
         {
@@ -81,6 +89,8 @@ public partial class WeaponThrowing
             }));
             _broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.HangingR,
                 PlayerStateChangeOptions.Delete, null, null));
+
+            // PlayerAnimationManager.Instance.RightHandHangingFalse();
         }
     }
 
@@ -92,7 +102,10 @@ public partial class WeaponThrowing
     public void ResetSword(PlayerInputEvent.PlayerHand actionInfo, bool releaseKinematic)
     {
         if (releaseKinematic)
+        {
             _playerRb.isKinematic = false;
+            _playerRb.constraints = RigidbodyConstraints.FreezeRotation;
+        }
 
         // つかみ状態でステートがついているのでステートを見てリセット処理
         if (actionInfo == PlayerInputEvent.PlayerHand.Left)

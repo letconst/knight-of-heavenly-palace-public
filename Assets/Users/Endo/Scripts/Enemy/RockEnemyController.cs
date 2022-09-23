@@ -43,6 +43,7 @@ public sealed class RockEnemyController : EnemyBase
             shard.gameObject.SetActive(false);
         }
 
+        // チュートリアルタスク4の達成通知
         tutorialRangeCollider.OnTriggerEnterAsObservable()
                              .Subscribe(other =>
                              {

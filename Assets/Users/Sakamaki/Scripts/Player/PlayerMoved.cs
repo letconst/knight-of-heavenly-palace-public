@@ -6,7 +6,7 @@ using UnityEngine;
 public partial class PlayerMovement
 {
     private Vector3 _moveVelocity = Vector3.zero;
-    
+
     /// <summary>
     /// プレイヤーの移動関数
     /// </summary>
@@ -28,16 +28,16 @@ public partial class PlayerMovement
         {
             // 移動を行うので、走るステートをつける (イベントの発行)
             PlayerInputEventEmitter.Instance.
-                Broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.Move, 
+                Broker.Publish(PlayerEvent.OnStateChangeRequest.GetEvent(PlayerStatus.PlayerState.Move,
                     PlayerStateChangeOptions.Add, null, null));
         }
-        
+
         // 移動計算処理
         // カメラを指定し x-z間のベクトルの習得
-        Vector3 cameraForward = Vector3.Scale(_cameraObject.transform.forward, new Vector3(1, 0, 1)).normalized;
+        Vector3 cameraForward = Vector3.Scale(_cameraObject.forward, new Vector3(1, 0, 1)).normalized;
         // 入力の値とカメラの向きで移動方向を決めて変数に代入
-        _moveForward = cameraForward * switchInput.z + _cameraObject.transform.right * switchInput.x;
-        
+        _moveForward = cameraForward * switchInput.z + _cameraObject.right * switchInput.x;
+
         // 向きと速度で掛けて、計算後の座標を出す
         _moveVelocity = _moveForward * moveSpeed;
         transform.LookAt(moveObject.transform.position + switchInput);
@@ -55,7 +55,7 @@ public partial class PlayerMovement
         {
             moveObject.rotation = Quaternion.LookRotation(_moveForward);
         }
-        
+
         StoppingNowPlayer();
     }
 

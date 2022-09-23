@@ -10,7 +10,7 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
     // SwitchInputManagerのキャッシュ用変数
     private SwitchInputManager _switchInput;
 
-    // イベント通知送受信用   
+    // イベント通知送受信用
     private readonly MessageBroker _broker = new MessageBroker();
 
     // イベント通知送受信の公開用
@@ -49,7 +49,7 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
         {
             return;
         }
-        
+
         // 左手の入力
         if (_switchInput.GetKeyDown(SwitchInputManager.JoyConButton.L))
         {
@@ -59,12 +59,6 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling)) return;
 
             // 発行可能なら、準備をして発行
-
-            // 入力情報の用意
-            var actionInfo = new PlayerActionInfo
-            {
-                actHand = PlayerInputEvent.PlayerHand.Left
-            };
 
             // 左手の投擲モードなら
             if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingMode))
@@ -88,11 +82,6 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
 
             // UI操作中なら終了
             if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.UIHandling)) return;
-
-            var actionInfo = new PlayerActionInfo()
-            {
-                actHand = PlayerInputEvent.PlayerHand.Right
-            };
 
             // 投擲モードなら
             if (PlayerStateManager.HasFlag(PlayerStatus.PlayerState.ThrowingMode))
@@ -160,7 +149,7 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
             if (switchInputAbs > PlayerStatus.ControllerDeadZone.magnitude)
             {
                 SP requireStamina = RequireStaminaEmitter();
-                
+
                 // スタミナの減少値よりプレイヤーのスタミナがあったらイベント発行
                 if (PlayerHealth.Instance.Sp.Value > requireStamina.Value)
                 {
@@ -300,7 +289,7 @@ public class PlayerInputEventEmitter : SingletonMonoBehaviour<PlayerInputEventEm
 
         return new SP(requireStamina);
     }
-    
+
     /// <summary>
     /// 回避可能のタイマーの処理を記述する関数
     /// </summary>

@@ -69,7 +69,7 @@ public class Dragon_StateChild_AttackMove : StateChildBase
         //　コサインθを逆三角関数で角度に変換
         float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
         //　長さのチェック
-        float distance = Vector3.Distance(controller.playerTransform.transform.position, mouthPosition.position);
+        float distance = Vector3.Distance(controller.playerTransform.position, mouthPosition.position);
         //　斜辺と角度から底辺を求めて長さを定量化
         float dis = distance * dot;
         //　チェック

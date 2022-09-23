@@ -49,6 +49,11 @@ public sealed class TutorialController : SingletonMonoBehaviour<TutorialControll
         () => Instance._results[7],
     };
 
+    private IDisposable _task1Disposable;
+    private IDisposable _task4Disposable;
+    private IDisposable _task5Disposable;
+    private IDisposable _task8Disposable;
+
     private void Start()
     {
         _enemyCountCanvasGroup       = FindObjectOfType<EnemyCount>().CanvasGroup;
@@ -56,26 +61,23 @@ public sealed class TutorialController : SingletonMonoBehaviour<TutorialControll
 
         IMessageReceiver broker = PlayerInputEventEmitter.Instance.Broker;
 
-        task1Target.OnTriggerEnterAsObservable()
-                   .Subscribe(Task1Judge)
-                   .AddTo(this);
+        // タスク1の
+        _task1Disposable = task1Target.OnTriggerEnterAsObservable()
+                                      .Subscribe(Task1Judge);
 
         broker.Receive<PlayerEvent.OnStateChanged>()
               .Subscribe(StateSwitching)
               .AddTo(this);
 
-        broker.Receive<MainGameEvent.Tutorial.OnTask4Passed>()
-              .Subscribe(_ => Task4Judge())
-              .AddTo(this);
+        _task4Disposable = broker.Receive<MainGameEvent.Tutorial.OnTask4Passed>()
+                                 .Subscribe(_ => Task4Judge());
 
-        broker.Receive<MainGameEvent.Tutorial.OnTask5Passed>()
-              .Subscribe(_ => Task5Judge())
-              .AddTo(this);
+        _task5Disposable = broker.Receive<MainGameEvent.Tutorial.OnTask5Passed>()
+                                 .Subscribe(_ => Task5Judge());
 
-        EnemyManeger.Instance.Broker
-                    .Receive<OnAttackEnemy>()
-                    .Subscribe(_ => Task8Judge())
-                    .AddTo(this);
+        _task8Disposable = EnemyManeger.Instance.Broker
+                                       .Receive<OnAttackEnemy>()
+                                       .Subscribe(_ => Task8Judge());
     }
 
     private async void Update()
@@ -94,6 +96,7 @@ public sealed class TutorialController : SingletonMonoBehaviour<TutorialControll
 
             await textCanvasGroup.ToggleFade(true, 1f);
         }
+        // 最後のタスク表示後、討伐数を切り替え表示
         else if (_completedCount == _tasks.Length)
         {
             _isNavigationCompleted = true;
@@ -129,7 +132,10 @@ public sealed class TutorialController : SingletonMonoBehaviour<TutorialControll
                 return;
 
             if (1 << other.gameObject.layer == LayerConstants.Player)
+            {
                 _results[_completedCount] = true;
+                _task1Disposable.Dispose();
+            }
         }
     }
 
@@ -154,6 +160,7 @@ public sealed class TutorialController : SingletonMonoBehaviour<TutorialControll
         if (_completedCount == 3)
         {
             _results[_completedCount] = true;
+            _task4Disposable.Dispose();
         }
     }
 
@@ -162,6 +169,7 @@ public sealed class TutorialController : SingletonMonoBehaviour<TutorialControll
         if (_completedCount == 4)
         {
             _results[_completedCount] = true;
+            _task5Disposable.Dispose();
         }
     }
 
@@ -188,6 +196,7 @@ public sealed class TutorialController : SingletonMonoBehaviour<TutorialControll
         if (_completedCount == 7)
         {
             _results[_completedCount] = true;
+            _task8Disposable.Dispose();
         }
     }
 }
